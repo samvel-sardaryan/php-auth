@@ -56,12 +56,29 @@ function handle_home()
 
 function show_register()
 {
-    echo 'Show Register';
+    $name = '';
+    $email = '';
+    $errors = [];
+    
+    require __DIR__ . '/../views/register.php';
 }
 
 function post_register()
 {
-    echo 'Post Register';
+    $name = trim($_POST['name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $errors = validate_registration($name, $email, $password);
+
+    if(empty($errors) && email_exists($email)) {
+        $errors['email'] = 'Email already registered.';
+    }
+    if(!empty($errors)) {
+        require __DIR__ . '/../views/register.php';
+        return;
+    }
+    create_user($name, $email, $password);
+    redirect('/login');
 }
 
 function show_login()
