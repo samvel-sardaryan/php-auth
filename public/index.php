@@ -83,20 +83,44 @@ function post_register()
 
 function show_login()
 {
-    echo 'Show Login';
+    $email = '';
+    $error = null;
+    require __DIR__ . '/../views/login.php';
 }
 
 function post_login()
 {
-    echo 'Post Login';
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $error = null;
+    $errors = validate_login($email, $password);
+
+    if(!empty($errors)) {
+        require __DIR__ . '/../views/login.php';
+        return;
+    }
+
+    $id = attempt_login($email, $password);
+
+    if($id === null) {
+        $error = 'Invalid email or password.';
+        require __DIR__ . '/../views/login.php';
+        return;
+    }
+    
+    login_user($id);
+    redirect('/dashboard');
 }
 
 function show_dashboard()
 {
-    echo 'Show Dashboard';
+    require_login();
+    $user = current_user();
+    require __DIR__ . '/../views/dashboard.php';
 }
 
 function post_logout()
 {
-    echo 'Post Logout';
+    logout_user();
+    redirect('/login');
 }
