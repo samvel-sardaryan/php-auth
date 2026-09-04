@@ -115,6 +115,7 @@ function post_login()
 function show_dashboard()
 {
     require_login();
+    header('Cache-Control: no-store');
     $user = current_user();
     require __DIR__ . '/../views/dashboard.php';
 }
