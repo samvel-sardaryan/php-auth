@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/helpers.php';
+require_once __DIR__ . '/mail.php';
 
 function email_exists($email) {
     $db = db();
@@ -16,6 +17,8 @@ function create_user($name, $email, $password) {
     $hash = password_hash($password, PASSWORD_DEFAULT);
     $stmt = $db->prepare("INSERT INTO users (name, email, password_hash) VALUES (?,?,?);");
     $stmt->execute([$name, $email, $hash]);
+
+    return (int) db()->lastInsertId();
 }
 
 function attempt_login($email, $password) {
@@ -27,6 +30,7 @@ function attempt_login($email, $password) {
     if ($user && password_verify($password, $user['password_hash'])) {
         return (int) $user['id'];
     }
+
     return null;
 }
 
@@ -40,7 +44,7 @@ function current_user() {
     }
 
     $db = db();
-    $stmt = $db->prepare("SELECT id, name, email, created_at FROM users WHERE id = ? LIMIT 1");
+    $stmt = $db->prepare("SELECT id, name, email, created_at, email_verified_at FROM users WHERE id = ? LIMIT 1");
     $stmt->execute([$_SESSION['user_id']]);
 
     return $stmt->fetch();
@@ -61,5 +65,55 @@ function logout_user() {
 function require_login() {
     if (!is_logged_in()) {
         redirect('/login');
+    }
+}
+
+function generate_token() {
+    return bin2hex(random_bytes(32));
+}
+
+function set_verification_token($userId) {
+    $token = generate_token();
+    $expires = date('Y-m-d H:i:s', time() + VERIFY_TOKEN_TTL * 60);
+    
+    $db = db();
+    $stmt = $db->prepare("UPDATE users SET verification_token = ?, verification_expires_at = ? WHERE id = ?;");
+    $stmt->execute([$token, $expires, $userId]);
+    
+    return $token;
+}
+
+function send_verification_email($email, $token) {
+    $link = APP_URL . '/verify-email?token=' . $token;
+    $subject = "Verify your email";
+    $body = "Please click the link to verify your email: " . $link;
+
+    return send_mail($email, $subject, $body);
+}
+
+function verify_email_token($token) {
+    $db = db();
+    $stmt = $db->prepare("SELECT id FROM users WHERE verification_token = ? AND verification_expires_at > NOW() AND email_verified_at IS NULL LIMIT 1");
+    $stmt->execute([$token]);
+    $user = $stmt->fetch();
+    
+    if ($user) {
+        $db->prepare("UPDATE users SET email_verified_at = NOW(), verification_token = NULL, verification_expires_at = NULL WHERE id = ?");
+        $db->execute([$user['id']]);
+        return true;
+    }
+
+    return false;
+}
+
+function is_verified($user) {
+    return $user && $user['email_verified_at'] !== null;
+}
+
+function require_verified() {
+    require_login();
+
+    if (!is_verified(current_user())) {
+        redirect('/verify-notice');
     }
 }
