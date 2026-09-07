@@ -74,11 +74,10 @@ function generate_token() {
 
 function set_verification_token($userId) {
     $token = generate_token();
-    $expires = date('Y-m-d H:i:s', time() + VERIFY_TOKEN_TTL * 60);
     
     $db = db();
-    $stmt = $db->prepare("UPDATE users SET verification_token = ?, verification_expires_at = ? WHERE id = ?;");
-    $stmt->execute([$token, $expires, $userId]);
+    $stmt = $db->prepare("UPDATE users SET verification_token = ?, verification_expires_at = DATE_ADD(NOW(), INTERVAL ? MINUTE) WHERE id = ?;");
+    $stmt->execute([$token, VERIFY_TOKEN_TTL, $userId]);
     
     return $token;
 }
@@ -91,6 +90,14 @@ function send_verification_email($email, $token) {
     return send_mail($email, $subject, $body);
 }
 
+function send_reset_password_email($email, $token) {
+    $link = APP_URL . '/reset-password?token=' . $token;
+    $subject = "Reset your password";
+    $body = "Please click the link to reset your password: " . $link;
+
+    return send_mail($email, $subject, $body);
+}
+
 function verify_email_token($token) {
     $db = db();
     $stmt = $db->prepare("SELECT id FROM users WHERE verification_token = ? AND verification_expires_at > NOW() AND email_verified_at IS NULL LIMIT 1");
@@ -98,8 +105,8 @@ function verify_email_token($token) {
     $user = $stmt->fetch();
     
     if ($user) {
-        $db->prepare("UPDATE users SET email_verified_at = NOW(), verification_token = NULL, verification_expires_at = NULL WHERE id = ?");
-        $db->execute([$user['id']]);
+        $stmt = $db->prepare("UPDATE users SET email_verified_at = NOW(), verification_token = NULL, verification_expires_at = NULL WHERE id = ?");
+        $stmt->execute([$user['id']]);
         return true;
     }
 
@@ -116,4 +123,42 @@ function require_verified() {
     if (!is_verified(current_user())) {
         redirect('/verify-notice');
     }
+}
+
+function set_reset_token($email) {
+    $db = db();
+    $stmt = $db->prepare("SELECT id FROM users WHERE email = ? LIMIT 1;");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch();
+
+    if (!$user) {
+        return null;
+    }
+
+    $token = generate_token();
+    $stmt = $db->prepare("UPDATE users SET reset_token = ?, reset_expires_at = DATE_ADD(NOW(), INTERVAL ? MINUTE) WHERE id = ?");
+    $stmt->execute([$token, RESET_TOKEN_TTL, $user['id']]);
+
+    return $token;
+}
+
+function find_user_by_reset_token($token) {
+    $db = db();
+    $stmt = $db->prepare("SELECT id FROM users WHERE reset_token = ? AND reset_expires_at > NOW() LIMIT 1");
+    $stmt->execute([$token]);
+    $user = $stmt->fetch();
+
+    if ($user) {
+        return (int) $user['id'];
+    }
+
+    return null;
+}
+
+function reset_user_password($userId, $password) {
+    $db = db();
+    $stmt = $db->prepare("UPDATE users SET password_hash = ?, reset_token = NULL, reset_expires_at = NULL WHERE id = ?");
+    $stmt->execute([password_hash($password, PASSWORD_DEFAULT), $userId]);
+
+    return true;
 }

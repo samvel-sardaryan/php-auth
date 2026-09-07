@@ -35,3 +35,19 @@ function validate_login($email, $password) {
 
         return $errors;
 }
+
+function validate_reset($password, $confirm) {
+    $errors = [];
+
+    if(trim($password) === '') {
+        $errors['password'] = 'Password is required.';
+    } elseif (mb_strlen($password) < 8) {
+        $errors['password'] = 'Password must be at least 8 characters long.';
+    }
+
+    if($password !== $confirm) {
+        $errors['confirm'] = 'Passwords do not match.';
+    }
+
+    return $errors;
+}

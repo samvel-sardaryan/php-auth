@@ -13,8 +13,14 @@
             <span class="error"><?= e($errors['password']) ?></span>
         <?php endif; ?>
     </div>
+    <?php if($success): ?>
+        <p class="success"><?= e($success) ?></p>
+    <?php endif; ?>
     <?php if($error): ?>
         <p class="error"><?= e($error) ?></p>
     <?php endif; ?>
     <button type="submit">Login</button>
+</form>
+<form action="/forgot-password" method="GET">
+    <button type="submit">Forgot Password</button>
 </form>
