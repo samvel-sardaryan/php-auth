@@ -53,6 +53,12 @@ $routes = [
 
 $lookup = $method . ' ' . $path;
 
+if ($method === 'POST') {
+    if (!csrf_verify($_POST['_csrf'] ?? null)) {
+        deny();
+    }
+}
+
 if (isset($routes[$lookup])) {
     $routes[$lookup]();
     exit;
@@ -129,7 +135,6 @@ function post_login() {
 
 function show_dashboard() {
     require_permission('view_dashboard');
-    header('Cache-Control: no-store');
     $user = current_user();
     require __DIR__ . '/../views/dashboard.php';
 }

@@ -19,6 +19,7 @@
                     <?= e($user['role_name']) ?>
                     <?php if (can('manage_users')): ?>
                         <form method="post" action="/admin/users/role" novalidate>
+                            <?= csrf_field() ?>
                             <input type="hidden" name="user_id" value="<?= e($user['id']) ?>">
                             <select name="role_id">
                                 <?php foreach ($roles as $role): ?>
