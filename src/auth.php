@@ -169,3 +169,17 @@ function reset_user_password($userId, $password) {
 
     return true;
 }
+
+function email_exists_for_other($email, $userId) {
+    $db = db();
+    $stmt = $db->prepare("SELECT email FROM users WHERE email = ? AND id != ? LIMIT 1;");
+    $stmt->execute([$email, $userId]);
+
+    return $stmt->fetch() !== false;
+}
+
+function update_profile($userId, $name, $email) {
+    $db = db();
+    $stmt = $db->prepare("UPDATE users SET name = ?, email = ? WHERE id = ?;");
+    return $stmt->execute([$name, $email, $userId]);
+}

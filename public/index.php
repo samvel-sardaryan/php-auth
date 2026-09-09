@@ -48,7 +48,10 @@ $routes = [
     'GET /moderator' => 'show_moderator',
     'GET /admin' => 'show_admin',
     'GET /admin/users' => 'show_admin_users',
-    'POST /admin/users/role' => 'post_admin_users_role'
+    'POST /admin/users/role' => 'post_admin_users_role',
+    'GET /profile' => 'show_profile',
+    'POST /profile' => 'post_profile',
+    'POST /profile/password' => 'post_profile_password'
 ];
 
 $lookup = $method . ' ' . $path;
@@ -288,4 +291,85 @@ function post_admin_users_role() {
     assign_role($userId, $roleId);
     flash_set('success', 'Role assigned successfully.');
     redirect('/admin/users');
+}
+
+function show_profile() {
+    require_login();
+    $user = current_user();
+    $errors = flash_get('errors') ?? [];
+    $old = flash_get('old') ?? [];
+    $success = flash_get('success');
+    $error = flash_get('error');
+    require __DIR__ . '/../views/profile.php';
+}
+
+function post_profile() {
+    require_login();
+    $name = trim($_POST['name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $user = current_user();
+    $errors = validate_profile($name, $email);
+
+    if (email_exists_for_other($email, $user['id'])) {
+        $errors['email'] = 'Email already exists.';
+    }
+
+    if (!empty($errors)) {
+        flash_set('errors', $errors);
+        flash_set('old', ['name' => $name, 'email' => $email]);
+        redirect('/profile');
+        return;
+    }
+
+    $emailChanged = $email !== $user['email'];
+
+    if ($emailChanged) {
+        if (!update_profile($user['id'], $name, $email)) {
+            flash_set('error', 'Failed to update profile.');
+        } else {
+            $db = db();
+            $stmt = $db->prepare("UPDATE users SET email_verified_at = NULL, verification_token = NULL, verification_expires_at = NULL WHERE id = ?;");
+            $stmt->execute([$user['id']]);
+            $token = set_verification_token($user['id']);
+            send_verification_email($email, $token);
+            flash_set('success', 'Profile updated. Please check your new email address to verify it.');
+        }
+    } elseif ($name !== $user['name']) {
+        if (!update_profile($user['id'], $name, $email)) {
+            flash_set('error', 'Failed to update profile.');
+        } else {
+            flash_set('success', 'Profile updated successfully.');
+        }
+    }
+    redirect('/profile');
+}
+
+function post_profile_password() {
+    require_login();
+    $current = $_POST['current'] ?? '';
+    $new = $_POST['new'] ?? '';
+    $confirm = $_POST['confirm'] ?? '';
+    $user = current_user();
+    $errors = validate_password_change($current, $new, $confirm);
+
+    $db = db();
+    $stmt = $db->prepare("SELECT password_hash FROM users WHERE id = ?");
+    $stmt->execute([$user['id']]);
+    $hash = $stmt->fetchColumn();
+
+    if (!empty($errors)) {
+        flash_set('errors', $errors);
+        redirect('/profile');
+        return;
+    }
+
+    if (!password_verify($current, $hash)) {
+        flash_set('error', 'Incorrect current password.');
+        redirect('/profile');
+        return;
+    }
+
+    reset_user_password($user['id'], $new);
+    flash_set('success', 'Password changed successfully.');
+    redirect('/profile');
 }
