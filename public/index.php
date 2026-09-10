@@ -14,7 +14,7 @@ if (PHP_SAPI === 'cli-server') {
 
     $resolved = realpath($root . $path);
 
-    if (is_file($resolved) && str_starts_with($resolved, $root . DIRECTORY_SEPARATOR)) {
+    if (is_file($resolved) && str_starts_with($resolved, $root . DIRECTORY_SEPARATOR) && $resolved !== __FILE__) {
         return false;
     }
 }
