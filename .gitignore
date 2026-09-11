@@ -1,2 +1,4 @@
 vendor/
 src/config.php
+public/uploads/avatars/*
+!public/uploads/avatars/.gitkeep

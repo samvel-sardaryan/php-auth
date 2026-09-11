@@ -55,4 +55,52 @@
     <button type="submit">Save</button>
 </form>
 
+<h2>Profile details</h2>
+<form method="post" action="/profile/details" novalidate>
+    <?= csrf_field() ?>
+    <div>
+        <label for="first_name">First Name</label>
+        <input type="text" id="first_name" name="first_name" value="<?= e($old['first_name'] ?? $profile['first_name']) ?>">
+        <?php if (isset($errors['first_name'])): ?>
+            <span class="error"><?= e($errors['first_name']) ?></span>
+        <?php endif; ?>
+    </div>
+    <div>
+        <label for="last_name">Last Name</label>
+        <input type="text" id="last_name" name="last_name" value="<?= e($old['last_name'] ?? $profile['last_name']) ?>">
+        <?php if (isset($errors['last_name'])): ?>
+            <span class="error"><?= e($errors['last_name']) ?></span>
+        <?php endif; ?>
+    </div>
+    <div>
+        <label for="phone">Phone</label>
+        <input type="text" id="phone" name="phone" value="<?= e($old['phone'] ?? $profile['phone']) ?>">
+        <?php if (isset($errors['phone'])): ?>
+            <span class="error"><?= e($errors['phone']) ?></span>
+        <?php endif; ?>
+    </div>
+    <div>
+        <label for="location">Location</label>
+        <input type="text" id="location" name="location" value="<?= e($old['location'] ?? $profile['location']) ?>">
+        <?php if (isset($errors['location'])): ?>
+            <span class="error"><?= e($errors['location']) ?></span>
+        <?php endif; ?>
+    </div>
+    <div>
+        <label for="bio">Bio</label>
+        <textarea id="bio" name="bio"><?= e($old['bio'] ?? $profile['bio']) ?></textarea>
+        <?php if (isset($errors['bio'])): ?>
+            <span class="error"><?= e($errors['bio']) ?></span>
+        <?php endif; ?>
+    </div>
+    <div>
+        <label for="date_of_birth">Date of Birth</label>
+        <input type="date" id="date_of_birth" name="date_of_birth" value="<?= e($old['date_of_birth'] ?? $profile['date_of_birth']) ?>">
+        <?php if (isset($errors['date_of_birth'])): ?>
+            <span class="error"><?= e($errors['date_of_birth']) ?></span>
+        <?php endif; ?>
+    </div>
+    <button type="submit">Save</button>
+</form>
+
 <a href="/dashboard">Back to dashboard</a>

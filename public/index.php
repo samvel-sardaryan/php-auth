@@ -4,7 +4,9 @@ require_once __DIR__ . '/../src/helpers.php';
 require_once __DIR__ . '/../src/validation.php';
 require_once __DIR__ . '/../src/auth.php';
 require_once __DIR__ . '/../src/authz.php';
+require_once __DIR__ . '/../src/users.php';
 require_once __DIR__ . '/../src/roles.php';
+require_once __DIR__ . '/../src/profiles.php';
 
 $path = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/', '/') ?: '/';
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -51,7 +53,8 @@ $routes = [
     'POST /admin/users/role' => 'post_admin_users_role',
     'GET /profile' => 'show_profile',
     'POST /profile' => 'post_profile',
-    'POST /profile/password' => 'post_profile_password'
+    'POST /profile/password' => 'post_profile_password',
+    'POST /profile/details' => 'post_profile_details',
 ];
 
 $lookup = $method . ' ' . $path;
@@ -296,6 +299,7 @@ function post_admin_users_role() {
 function show_profile() {
     require_login();
     $user = current_user();
+    $profile = get_profile($user['id']);
     $errors = flash_get('errors') ?? [];
     $old = flash_get('old') ?? [];
     $success = flash_get('success');
@@ -371,5 +375,35 @@ function post_profile_password() {
 
     reset_user_password($user['id'], $new);
     flash_set('success', 'Password changed successfully.');
+    redirect('/profile');
+}
+
+function post_profile_details() {
+    require_login();
+    $d = [
+        'first_name' => trim($_POST['first_name'] ?? ''),
+        'last_name'  => trim($_POST['last_name'] ?? ''),
+        'phone'      => trim($_POST['phone'] ?? ''),
+        'location'   => trim($_POST['location'] ?? ''),
+        'bio'        => trim($_POST['bio'] ?? ''),
+        'date_of_birth' => trim($_POST['date_of_birth'] ?? ''),
+    ];
+
+    $errors = validate_profile_details($d);
+
+    if (!empty($errors)) {
+        flash_set('errors', $errors);
+        flash_set('old', $d);
+        redirect('/profile');
+        return;
+    }
+
+    if ($d['date_of_birth'] === '') {
+        $d['date_of_birth'] = null;
+    }
+
+    $user = current_user();
+    save_profile($user['id'], $d);
+    flash_set('success', 'Profile details updated successfully.');
     redirect('/profile');
 }

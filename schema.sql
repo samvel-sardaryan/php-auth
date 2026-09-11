@@ -89,3 +89,37 @@ ALTER TABLE users
     MODIFY COLUMN role_id INT UNSIGNED NOT NULL DEFAULT 1;
 
 UPDATE users SET role_id = (SELECT id FROM roles WHERE name='admin') WHERE email='test@test.test';
+
+CREATE TABLE IF NOT EXISTS profiles (
+  user_id                 INT UNSIGNED NOT NULL,
+  first_name              VARCHAR(100) NULL,
+  last_name               VARCHAR(100) NULL,
+  phone                   VARCHAR(30)  NULL,
+  location                VARCHAR(100) NULL,
+  date_of_birth           DATE         NULL,
+  bio                     TEXT         NULL,
+  avatar                  VARCHAR(255) NULL,
+  PRIMARY KEY (user_id),
+  CONSTRAINT fk_profiles_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS posts (
+  id                      INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id                 INT UNSIGNED NOT NULL,
+  title                   VARCHAR(150) NOT NULL,
+  content                 TEXT         NOT NULL,
+  created_at              TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  deleted_at              DATETIME     NULL,
+  PRIMARY KEY (id),
+  KEY idx_posts_author (user_id, deleted_at),
+  KEY idx_posts_feed (deleted_at, created_at),
+  CONSTRAINT fk_posts_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO permissions (name) VALUES ('manage_posts');
+
+INSERT INTO role_permissions (role_id, permission_id)
+    SELECT r.id, p.id
+    FROM roles r
+    JOIN permissions p ON p.name = 'manage_posts'
+    WHERE r.name = 'admin';
