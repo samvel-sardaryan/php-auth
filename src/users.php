@@ -16,3 +16,12 @@ function list_users() {
     $stmt->execute();
     return $stmt->fetchAll();
 }
+
+function find_user($id) {
+    $db = db();
+    $stmt = $db->prepare("SELECT u.id, u.name, u.email, u.created_at, r.name as role_name
+        FROM users u LEFT JOIN roles r ON u.role_id = r.id
+        WHERE u.id = ? LIMIT 1");
+    $stmt->execute([$id]);
+    return $stmt->fetch();
+}

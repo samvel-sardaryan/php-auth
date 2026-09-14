@@ -7,6 +7,29 @@
     <p class="error"><?= e($error) ?></p>
 <?php endif; ?>
 
+<h2>Profile picture</h2>
+<div>
+    <?php if ($profile['avatar']): ?>
+        <img src="/uploads/avatars/<?= e($profile['avatar']) ?>" alt="Profile picture" width="120" height="120">
+        <form method="post" action="/profile/avatar/delete">
+            <?= csrf_field() ?>
+            <button type="submit">Remove picture</button>
+        </form>
+    <?php else: ?>
+        <span class="avatar-placeholder"><?= e(mb_strtoupper(mb_substr($user['name'], 0, 1))) ?></span>
+        <p class="hint">No profile picture yet.</p>
+    <?php endif; ?>
+</div>
+<form method="post" action="/profile/avatar" enctype="multipart/form-data">
+    <?= csrf_field() ?>
+    <div>
+        <label for="avatar">Choose an image</label>
+        <input type="file" id="avatar" name="avatar" accept="image/*">
+        <p class="hint">JPG, PNG, GIF or WEBP, up to 2MB.</p>
+    </div>
+    <button type="submit">Upload</button>
+</form>
+
 <h2>Account details</h2>
 <form method="post" action="/profile" novalidate>
     <?= csrf_field() ?>

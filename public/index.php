@@ -7,6 +7,8 @@ require_once __DIR__ . '/../src/authz.php';
 require_once __DIR__ . '/../src/users.php';
 require_once __DIR__ . '/../src/roles.php';
 require_once __DIR__ . '/../src/profiles.php';
+require_once __DIR__ . '/../src/upload.php';
+require_once __DIR__ . '/../src/posts.php';
 
 $path = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/', '/') ?: '/';
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -55,9 +57,21 @@ $routes = [
     'POST /profile' => 'post_profile',
     'POST /profile/password' => 'post_profile_password',
     'POST /profile/details' => 'post_profile_details',
+    'POST /profile/avatar' => 'post_profile_avatar',
+    'POST /profile/avatar/delete' => 'post_profile_avatar_delete',
+    'GET /users' => 'show_user_profile',
 ];
 
 $lookup = $method . ' ' . $path;
+
+if (
+    $method === 'POST' && empty($_POST) && empty($_FILES)
+    && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 0
+) {
+    http_response_code(413);
+    echo '413 Content Too Large';
+    exit;
+}
 
 if ($method === 'POST') {
     if (!csrf_verify($_POST['_csrf'] ?? null)) {
@@ -280,7 +294,7 @@ function show_admin_users() {
 function post_admin_users_role() {
     require_permission('manage_users');
     $userId = (int) ($_POST['user_id'] ?? 0);
-    $roleId = (int)($_POST['role_id'] ?? 0);
+    $roleId = (int) ($_POST['role_id'] ?? 0);
     if (!role_exists($roleId)) {
         flash_set('error', 'Invalid role.');
         redirect('/admin/users');
@@ -406,4 +420,51 @@ function post_profile_details() {
     save_profile($user['id'], $d);
     flash_set('success', 'Profile details updated successfully.');
     redirect('/profile');
+}
+
+function post_profile_avatar() {
+    require_login();
+    $error = null;
+    $filename = store_avatar($_FILES['avatar'] ?? [], $error);
+
+    if (!$filename) {
+        flash_set('error', $error);
+        redirect('/profile');
+    } else {
+        $user = current_user();
+        $profile = get_profile($user['id']);
+        set_avatar($user['id'], $filename);
+        delete_avatar_file($profile['avatar']);
+        flash_set('success', 'Avatar updated successfully.');
+        redirect('/profile');
+    }
+}
+
+function post_profile_avatar_delete() {
+    require_login();
+    $user = current_user();
+    $profile = get_profile($user['id']);
+    set_avatar($user['id'], null);
+    delete_avatar_file($profile['avatar']);
+    flash_set('success', 'Avatar deleted successfully.');
+    redirect('/profile');
+}
+
+function show_user_profile() {
+    require_verified();
+    $user = find_user((int) ($_GET['id'] ?? 0));
+    if (!$user) {
+        http_response_code(404);
+        echo '404 Not Found';
+        exit;
+    }
+
+    if (current_user()['id'] === $user['id']) {
+        redirect('/profile');
+    }
+
+    $profile = get_profile($user['id']);
+    // list_user_posts()
+
+    require __DIR__ . '/../views/user-profile.php';
 }

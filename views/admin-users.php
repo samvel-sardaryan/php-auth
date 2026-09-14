@@ -7,6 +7,7 @@
             <th>Role</th>
             <th>Email Verified</th>
             <th>Created At</th>
+            <th>Profile</th>
         </tr>
     </thead>
     <tbody>
@@ -32,6 +33,7 @@
                 </td>
                 <td><?= e($user['email_verified_at'] ? 'Yes' : 'No') ?></td>
                 <td><?= e($user['created_at']) ?></td>
+                <td><a href="/users?id=<?= e($user['id']) ?>">View</a></td>
             </tr>
         <?php endforeach; ?>
     </tbody>

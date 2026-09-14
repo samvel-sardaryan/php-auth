@@ -139,3 +139,21 @@ function validate_profile_avatar(array $file) {
 
     return $errors;
 }
+
+function validate_post($title, $content) {
+    $errors = [];
+
+    if (trim($title) === '') {
+        $errors['title'] = 'Title is required.';
+    } elseif (mb_strlen($title) > 150) {
+        $errors['title'] = 'Maximum 150 characters.';
+    }
+
+    if (trim($content) === '') {
+        $errors['content'] = 'Content is required.';
+    } elseif (mb_strlen($content) > 5000) {
+        $errors['content'] = 'Maximum 5000 characters.';
+    }
+
+    return $errors;
+}
