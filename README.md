@@ -1,7 +1,7 @@
 # PHP Auth
 
-Registration, login, email verification, password reset, roles and permissions.
-Plain PHP, no framework.
+Registration, login, email verification, password reset, roles and permissions,
+user profiles with a picture, and posts. Plain PHP, no framework.
 
 ## Requirements
 
@@ -55,9 +55,19 @@ Open http://localhost:8000
 | GET | `/reset-password?token=` | New password form | — |
 | POST | `/reset-password` | Save the new password | — |
 | GET | `/dashboard` | Main page | `view_dashboard` |
-| GET | `/profile` | Name, email and password settings | login |
+| GET | `/profile` | Your own profile: settings, picture, details, your posts | login |
 | POST | `/profile` | Save name and email | login |
 | POST | `/profile/password` | Change password | login |
+| POST | `/profile/details` | Save first/last name, phone, location, date of birth, bio | login |
+| POST | `/profile/avatar` | Upload or replace the profile picture | login |
+| POST | `/profile/avatar/delete` | Remove the profile picture | login |
+| GET | `/users?id=` | Another user's profile and their posts, read-only | verified |
+| GET | `/posts` | Feed of every post, newest first | verified |
+| GET | `/posts/create` | New post form | verified |
+| POST | `/posts/create` | Publish a post | verified |
+| GET | `/posts/edit?id=` | Edit form | post owner or `manage_posts` |
+| POST | `/posts/edit` | Save changes | post owner or `manage_posts` |
+| POST | `/posts/delete` | Soft-delete a post | post owner or `manage_posts` |
 | GET | `/moderator` | Moderator page | `access_moderator_page` |
 | GET | `/admin` | Admin page | `access_admin_page` |
 | GET | `/admin/users` | User list | `view_users` |
@@ -72,10 +82,13 @@ Not logged in redirects to `/login`. Logged in but unverified redirects to
 |---|---|
 | user | `view_dashboard` |
 | moderator | `view_dashboard`, `view_users`, `access_moderator_page` |
-| admin | all five |
+| admin | all six |
 
 New registrations get the `user` role. Permissions live in the database, so adding
 a role is `INSERT`s into `roles` and `role_permissions` — no code change.
+
+`manage_posts` (admin only) lets a user edit or delete **any** post. Everyone can
+edit and delete their own, which is ownership rather than a permission — see below.
 
 ## Files
 
@@ -83,12 +96,20 @@ a role is `INSERT`s into `roles` and `role_permissions` — no code change.
     src/config.php     settings (not in git)
     src/db.php         database connection
     src/auth.php       users, sessions, tokens
-    src/authz.php      permission checks: can(), require_permission()
-    src/roles.php      role and user queries
+    src/authz.php      permission and ownership checks: can(), require_permission(),
+                       owns_post(), require_post_owner()
+    src/roles.php      role queries
+    src/users.php      user queries: find_user(), list_users(), user_exists()
+    src/profiles.php   profile read/write, avatar column
+    src/posts.php      post queries, all filtering deleted_at IS NULL
+    src/upload.php     avatar upload validation and storage
     src/validation.php form validation
     src/mail.php       sending email
     src/helpers.php    escaping, redirects, flash messages, CSRF
     views/             page templates
+    views/_post.php    renders one post; the only place a post is rendered
+
+    public/uploads/avatars/   uploaded pictures (gitignored except .gitkeep)
 
 ## Notes
 
@@ -101,3 +122,18 @@ a role is `INSERT`s into `roles` and `role_permissions` — no code change.
 - Changing your email clears verification and sends a new link. `/profile` only
   requires login, not verification, so a mistyped address can still be corrected.
 - Emails go to Mailtrap, not to real addresses.
+- Every user may have one profile row. `profiles.user_id` is both the primary key
+  and the foreign key, so a second profile is impossible. `get_profile()` returns
+  an array of nulls when there is no row, so views never have to check.
+- Profile pictures are validated by decoding them with `getimagesize()`, never by
+  the uploaded filename or the client's MIME type, and are stored under a random
+  name. Uploads land in a directory the web server will execute, so a file named
+  `shell.php` that was trusted would run.
+- Posts are **soft-deleted**: `deleted_at` is set and every read filters
+  `deleted_at IS NULL`. A deleted post is a 404 even for its author.
+- Editing or deleting a post needs ownership, which is a different question from a
+  permission: `can('manage_posts')` is the same answer for every post, while
+  `owns_post($post)` depends on the row, so it can only be checked after the
+  lookup. The gate passes for either.
+- Posts are rendered by one partial, `views/_post.php`, used by the feed and both
+  profile pages — so an edit shows up everywhere without any page being updated.

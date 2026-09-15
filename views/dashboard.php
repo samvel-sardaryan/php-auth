@@ -14,6 +14,8 @@
         <a href="/admin/users">Admin Users</a>
     <?php endif; ?>
     <a href="/profile">Profile</a>
+    <a href="/posts">Posts</a>
+    <a href="/posts/create">New Post</a>
     <form action="/logout" method="POST">
         <?= csrf_field() ?>
         <button type="submit">Logout</button>

@@ -31,6 +31,12 @@ $filled = array_filter($details, fn($v) => $v !== null && $v !== '');
 <?php endif; ?>
 
 <h2>Posts</h2>
-<p class="hint">No posts yet.</p>
+<?php if (empty($posts)): ?>
+    <p class="hint">This user has not posted yet.</p>
+<?php else: ?>
+    <?php foreach ($posts as $post): ?>
+        <?php require __DIR__ . '/_post.php'; ?>
+    <?php endforeach; ?>
+<?php endif; ?>
 
 <a href="/dashboard">Back to dashboard</a>

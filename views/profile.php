@@ -126,4 +126,14 @@
     <button type="submit">Save</button>
 </form>
 
+<h2>My posts</h2>
+<p><a href="/posts/create">New post</a></p>
+<?php if (empty($posts)): ?>
+    <p class="hint">You have not posted yet.</p>
+<?php else: ?>
+    <?php foreach ($posts as $post): ?>
+        <?php require __DIR__ . '/_post.php'; ?>
+    <?php endforeach; ?>
+<?php endif; ?>
+
 <a href="/dashboard">Back to dashboard</a>
