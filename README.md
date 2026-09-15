@@ -74,7 +74,9 @@ Open http://localhost:8000
 | POST | `/admin/users/role` | Change a user's role | `manage_users` |
 
 Not logged in redirects to `/login`. Logged in but unverified redirects to
-`/verify-notice`. Logged in without the permission returns **403**.
+`/verify-notice`. Logged in without the permission returns **403**. Already logged in
+and asking for `/login`, `/register`, `/forgot-password` or `/reset-password` redirects
+to `/dashboard` — `require_guest()` in `src/auth.php`, the mirror of `require_login()`.
 
 ## Roles and permissions
 
@@ -92,7 +94,13 @@ edit and delete their own, which is ownership rather than a permission — see b
 
 ## Files
 
-    public/index.php   routes and handlers
+    public/index.php   bootstrap, the route table, the CSRF gate, dispatch
+    handlers/          request handlers, one file per area
+    handlers/auth.php    register, login, logout, verification, password reset
+    handlers/pages.php   pages that only check a permission and render a view
+    handlers/admin.php   user list and role changes
+    handlers/profile.php your own profile, and viewing someone else's
+    handlers/posts.php   the feed and post create/edit/delete
     src/config.php     settings (not in git)
     src/db.php         database connection
     src/auth.php       users, sessions, tokens
@@ -111,9 +119,17 @@ edit and delete their own, which is ownership rather than a permission — see b
 
     public/uploads/avatars/   uploaded pictures (gitignored except .gitkeep)
 
+Three layers, three directories: `handlers/` handles a request, `src/` talks to the
+database, `views/` renders HTML. `handlers/` sits beside `public/` rather than inside
+it, so nothing there is reachable over HTTP.
+
 ## Notes
 
 - `src/config.php` is gitignored. It holds passwords.
+- Flash messages are consumed on read, so a page that redirects somewhere carrying one
+  must land on a page that reads it. An unread flash is not discarded — it waits, and
+  surfaces later on an unrelated page. That is why `verify_email()` sends a logged-in
+  user to `/dashboard` rather than `/login`, and why the dashboard renders flashes.
 - Verification tokens last 24 hours, reset tokens 30 minutes. Both set in `config.php`.
 - Tokens are stored as a SHA-256 hash, so a database leak yields no working links.
 - Tokens work once. Using one clears it from the database.

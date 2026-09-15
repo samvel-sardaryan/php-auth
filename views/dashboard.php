@@ -1,4 +1,11 @@
 <h1>Dashboard</h1>
+
+<?php if ($success): ?>
+    <p class="success"><?= e($success) ?></p>
+<?php endif; ?>
+<?php if ($error): ?>
+    <p class="error"><?= e($error) ?></p>
+<?php endif; ?>
 <div>
     <p><span class="label">Hello</span> <?= e($user['name']) ?></p>
     <p><span class="label">Role:</span> <?= e($user['role_name']) ?></p>

@@ -68,6 +68,12 @@ function require_login() {
     }
 }
 
+function require_guest() {
+    if (is_logged_in()) {
+        redirect('/dashboard');
+    }
+}
+
 function generate_token() {
     return bin2hex(random_bytes(32));
 }
