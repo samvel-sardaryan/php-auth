@@ -91,8 +91,17 @@ function validate_profile_details(array $d) {
         $errors['last_name'] = 'Maximum 100 characters.';
     }
 
-    if (mb_strlen($d['phone']) > 30) {
-        $errors['phone'] = 'Maximum 30 characters.';
+    if ($d['phone'] !== '') {
+        if (mb_strlen($d['phone']) > 30) {
+            $errors['phone'] = 'Maximum 30 characters.';
+        } elseif (!preg_match('/^\+?[0-9 ()\-]+$/', $d['phone'])) {
+            $errors['phone'] = 'Phone may contain only digits, spaces and + ( ) -';
+        } else {
+            $digits = preg_replace('/\D/', '', $d['phone']);
+            if (strlen($digits) < 7 || strlen($digits) > 15) {
+                $errors['phone'] = 'Phone must contain between 7 and 15 digits.';
+            }
+        }
     }
 
     if (mb_strlen($d['location']) > 100) {

@@ -62,7 +62,6 @@ $routes = [
     'POST /profile' => 'post_profile',
     'POST /profile/password' => 'post_profile_password',
     'POST /profile/details' => 'post_profile_details',
-    'POST /profile/avatar' => 'post_profile_avatar',
     'POST /profile/avatar/delete' => 'post_profile_avatar_delete',
     'GET /users' => 'show_user_profile',
     'GET /posts' => 'show_posts',

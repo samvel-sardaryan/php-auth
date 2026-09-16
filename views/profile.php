@@ -7,29 +7,6 @@
     <p class="error"><?= e($error) ?></p>
 <?php endif; ?>
 
-<h2>Profile picture</h2>
-<div>
-    <?php if ($profile['avatar']): ?>
-        <img src="/uploads/avatars/<?= e($profile['avatar']) ?>" alt="Profile picture" width="120" height="120">
-        <form method="post" action="/profile/avatar/delete">
-            <?= csrf_field() ?>
-            <button type="submit">Remove picture</button>
-        </form>
-    <?php else: ?>
-        <span class="avatar-placeholder"><?= e(mb_strtoupper(mb_substr($user['name'], 0, 1))) ?></span>
-        <p class="hint">No profile picture yet.</p>
-    <?php endif; ?>
-</div>
-<form method="post" action="/profile/avatar" enctype="multipart/form-data">
-    <?= csrf_field() ?>
-    <div>
-        <label for="avatar">Choose an image</label>
-        <input type="file" id="avatar" name="avatar" accept="image/*">
-        <p class="hint">JPG, PNG, GIF or WEBP, up to 2MB.</p>
-    </div>
-    <button type="submit">Upload</button>
-</form>
-
 <h2>Account details</h2>
 <form method="post" action="/profile" novalidate>
     <?= csrf_field() ?>
@@ -79,7 +56,23 @@
 </form>
 
 <h2>Profile details</h2>
-<form method="post" action="/profile/details" novalidate>
+
+<div>
+    <?php if ($profile['avatar']): ?>
+        <img src="/uploads/avatars/<?= e($profile['avatar']) ?>" alt="Profile picture" width="120" height="120">
+        <form method="post" action="/profile/avatar/delete">
+            <?= csrf_field() ?>
+            <button type="submit">Remove picture</button>
+        </form>
+    <?php else: ?>
+        <span class="avatar-placeholder"><?= e(mb_strtoupper(mb_substr($user['name'], 0, 1))) ?></span>
+        <p class="hint">No profile picture yet.</p>
+    <?php endif; ?>
+</div>
+
+<!-- enctype is mandatory: without it the browser sends the filename as plain text
+     and $_FILES is empty, so every upload looks like "no file chosen". -->
+<form method="post" action="/profile/details" enctype="multipart/form-data" novalidate>
     <?= csrf_field() ?>
     <div>
         <label for="first_name">First Name</label>
@@ -97,7 +90,8 @@
     </div>
     <div>
         <label for="phone">Phone</label>
-        <input type="text" id="phone" name="phone" value="<?= e($old['phone'] ?? $profile['phone']) ?>">
+        <input type="tel" id="phone" name="phone" value="<?= e($old['phone'] ?? $profile['phone']) ?>">
+        <p class="hint">Digits, spaces and + ( ) - only. 7 to 15 digits.</p>
         <?php if (isset($errors['phone'])): ?>
             <span class="error"><?= e($errors['phone']) ?></span>
         <?php endif; ?>
@@ -121,6 +115,14 @@
         <input type="date" id="date_of_birth" name="date_of_birth" value="<?= e($old['date_of_birth'] ?? $profile['date_of_birth']) ?>">
         <?php if (isset($errors['date_of_birth'])): ?>
             <span class="error"><?= e($errors['date_of_birth']) ?></span>
+        <?php endif; ?>
+    </div>
+    <div>
+        <label for="avatar">Profile picture</label>
+        <input type="file" id="avatar" name="avatar" accept="image/*">
+        <p class="hint">JPG, PNG, GIF or WEBP, up to 2MB. Leave empty to keep the current one.</p>
+        <?php if (isset($errors['avatar'])): ?>
+            <span class="error"><?= e($errors['avatar']) ?></span>
         <?php endif; ?>
     </div>
     <button type="submit">Save</button>

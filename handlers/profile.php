@@ -87,6 +87,8 @@ function post_profile_password() {
 
 function post_profile_details() {
     require_login();
+    $user = current_user();
+
     $d = [
         'first_name' => trim($_POST['first_name'] ?? ''),
         'last_name'  => trim($_POST['last_name'] ?? ''),
@@ -102,35 +104,53 @@ function post_profile_details() {
         flash_set('errors', $errors);
         flash_set('old', $d);
         redirect('/profile');
-        return;
     }
 
     if ($d['date_of_birth'] === '') {
         $d['date_of_birth'] = null;
     }
 
-    $user = current_user();
-    save_profile($user['id'], $d);
-    flash_set('success', 'Profile details updated successfully.');
-    redirect('/profile');
-}
+    $filename = null;
+    if (($_FILES['avatar']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+        $error = null;
+        $filename = store_avatar($_FILES['avatar'], $error);
+        if (!$filename) {
+            flash_set('error', $error);
+            flash_set('old', $d);
+            redirect('/profile');
+        }
+    }
 
-function post_profile_avatar() {
-    require_login();
-    $error = null;
-    $filename = store_avatar($_FILES['avatar'] ?? [], $error);
+    $oldAvatar = get_profile($user['id'])['avatar'];
 
-    if (!$filename) {
-        flash_set('error', $error);
-        redirect('/profile');
-    } else {
-        $user = current_user();
-        $profile = get_profile($user['id']);
-        set_avatar($user['id'], $filename);
-        delete_avatar_file($profile['avatar']);
-        flash_set('success', 'Avatar updated successfully.');
+    $db = db();
+
+    try {
+        $db->beginTransaction();
+        save_profile($user['id'], $d);
+
+        if ($filename !== null) {
+            set_avatar($user['id'], $filename);
+        }
+
+        $db->commit();
+    } catch (Throwable $e) {
+        $db->rollBack();
+        delete_avatar_file($filename);
+        error_log('profile save failed: ' . $e->getMessage());
+        flash_set('error', 'Failed to update profile.');
+        flash_set('old', $d);
         redirect('/profile');
     }
+
+    if ($filename !== null) {
+        delete_avatar_file($oldAvatar);
+    }
+
+    flash_set('success', $filename !== null
+        ? 'Profile and picture updated successfully.'
+        : 'Profile updated successfully.');
+    redirect('/profile');
 }
 
 function post_profile_avatar_delete() {
