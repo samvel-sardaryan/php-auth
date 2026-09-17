@@ -21,6 +21,30 @@
             <span class="error"><?= e($errors['content']) ?></span>
         <?php endif; ?>
     </div>
+    <div>
+        <label for="category_id">Category</label>
+        <select id="category_id" name="category_id">
+            <option value="">Choose a category</option>
+            <?php foreach ($categories as $c): ?>
+                <option value="<?= e($c['id']) ?>" <?= (string) ($old['category_id'] ?? '') === (string) $c['id'] ? 'selected' : '' ?>><?= e($c['name']) ?></option>
+            <?php endforeach; ?>
+        </select>
+        <?php if (isset($errors['category_id'])): ?>
+            <span class="error"><?= e($errors['category_id']) ?></span>
+        <?php endif; ?>
+    </div>
+    <div>
+        <label for="status">Status</label>
+        <select id="status" name="status">
+            <?php foreach ($isEdit ? STATUS_TYPES : ['draft', 'published'] as $s): ?>
+                <option value="<?= e($s) ?>" <?= ($old['status'] ?? 'draft') === $s ? 'selected' : '' ?>><?= e(ucfirst($s)) ?></option>
+            <?php endforeach; ?>
+        </select>
+        <?php if (isset($errors['status'])): ?>
+            <span class="error"><?= e($errors['status']) ?></span>
+        <?php endif; ?>
+        <p class="hint">A draft is visible only to you. Archived posts stay off the feed.</p>
+    </div>
     <button type="submit"><?= $isEdit ? 'Save changes' : 'Publish' ?></button>
 </form>
 

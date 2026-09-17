@@ -131,7 +131,7 @@ function validate_profile_avatar(array $file) {
     $max = 3 * 1024 * 1024;
 
     if ($file['error'] === UPLOAD_ERR_NO_FILE) {
-        return $errors; // optional: treat as "no change"
+        return $errors;
     }
 
     if ($file['error'] !== UPLOAD_ERR_OK) {
@@ -149,7 +149,7 @@ function validate_profile_avatar(array $file) {
     return $errors;
 }
 
-function validate_post($title, $content) {
+function validate_post($title, $content, $status, $categoryId) {
     $errors = [];
 
     if (trim($title) === '') {
@@ -162,6 +162,34 @@ function validate_post($title, $content) {
         $errors['content'] = 'Content is required.';
     } elseif (mb_strlen($content) > 5000) {
         $errors['content'] = 'Maximum 5000 characters.';
+    }
+
+    if (!in_array($status, STATUS_TYPES)) {
+        $errors['status'] = 'Invalid status.';
+    }
+
+    if ((int)$categoryId <= 0 || !category_exists($categoryId)) {
+        $errors['category_id'] = 'Invalid category.';
+    }
+
+    return $errors;
+}
+
+function validate_category($name, $slug) {
+    $errors = [];
+
+    if (trim($name) === '') {
+        $errors['name'] = 'Name is required.';
+    } elseif (mb_strlen($name) > 50) {
+        $errors['name'] = 'Maximum 50 characters.';
+    }
+
+    if (trim($slug) === '') {
+        $errors['slug'] = 'Slug is required.';
+    } elseif (mb_strlen($slug) > 50) {
+        $errors['slug'] = 'Maximum 50 characters.';
+    } elseif (!preg_match('/^[a-z0-9-]+$/', $slug)) {
+        $errors['slug'] = 'Slug may contain only lowercase letters, numbers and hyphens.';
     }
 
     return $errors;

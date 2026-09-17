@@ -2,43 +2,61 @@
 
 require_once __DIR__ . '/db.php';
 
-function create_post($userId, $title, $content) {
-    $db = db();
-    $stmt = $db->prepare("INSERT INTO posts (user_id, title, content) VALUES (?, ?, ?)");
-    $stmt->execute([$userId, $title, $content]);
-    return (int) $db->lastInsertId();
+const STATUS_TYPES = ['draft', 'published', 'archived'];
+
+const POST_SELECT = "SELECT posts.*, users.name AS author_name, categories.name AS category_name
+    FROM posts
+    JOIN users ON users.id = posts.user_id
+    JOIN categories ON categories.id = posts.category_id";
+
+function post_visibility($viewerId = null, $seeAll = false) {
+    $live = 'posts.deleted_at IS NULL';
+
+    if ($seeAll) {
+        return [$live, []];
+    }
+
+    if ($viewerId === null) {
+        return ["$live AND posts.status = 'published'", []];
+    }
+
+    return ["$live AND (posts.status = 'published' OR posts.user_id = ?)", [$viewerId]];
 }
 
-function find_post($id) {
-    $db = db();
-    $stmt = $db->prepare("SELECT posts.*, users.name AS author_name FROM posts JOIN users ON posts.user_id = users.id WHERE posts.id = ? AND posts.deleted_at IS NULL LIMIT 1");
-    $stmt->execute([$id]);
+function create_post($userId, $title, $content, $status, $categoryId) {
+    $stmt = db()->prepare("INSERT INTO posts (user_id, title, content, status, category_id) VALUES (?, ?, ?, ?, ?)");
+    $stmt->execute([$userId, $title, $content, $status, $categoryId]);
+    return (int) db()->lastInsertId();
+}
+
+function find_post($id, $viewerId = null, $seeAll = false) {
+    [$where, $params] = post_visibility($viewerId, $seeAll);
+    $stmt = db()->prepare(POST_SELECT . " WHERE posts.id = ? AND $where LIMIT 1");
+    $stmt->execute([$id, ...$params]);
     return $stmt->fetch();
 }
 
-function list_posts() {
-    $db = db();
-    $stmt = $db->prepare("SELECT posts.*, users.name AS author_name FROM posts JOIN users ON posts.user_id = users.id WHERE posts.deleted_at IS NULL ORDER BY posts.created_at DESC, posts.id DESC");
-    $stmt->execute();
+function list_posts($viewerId = null, $seeAll = false) {
+    [$where, $params] = post_visibility($viewerId, $seeAll);
+    $stmt = db()->prepare(POST_SELECT . " WHERE $where ORDER BY posts.created_at DESC, posts.id DESC");
+    $stmt->execute($params);
     return $stmt->fetchAll();
 }
 
-function list_user_posts($userId) {
-    $db = db();
-    $stmt = $db->prepare("SELECT posts.*, users.name AS author_name FROM posts JOIN users ON posts.user_id = users.id WHERE users.id = ? AND posts.deleted_at IS NULL ORDER BY posts.created_at DESC, posts.id DESC");
-    $stmt->execute([$userId]);
+function list_user_posts($userId, $viewerId = null, $seeAll = false) {
+    [$where, $params] = post_visibility($viewerId, $seeAll);
+    $stmt = db()->prepare(POST_SELECT . " WHERE posts.user_id = ? AND $where ORDER BY posts.created_at DESC, posts.id DESC");
+    $stmt->execute([$userId, ...$params]);
     return $stmt->fetchAll();
 }
 
-function update_post($id, $title, $content) {
-    $db = db();
-    $stmt = $db->prepare("UPDATE posts SET title = ?, content = ? WHERE id = ? AND deleted_at IS NULL");
-    return $stmt->execute([$title, $content, $id]);
+function update_post($id, $title, $content, $status, $categoryId) {
+    $stmt = db()->prepare("UPDATE posts SET title = ?, content = ?, status = ?, category_id = ? WHERE id = ? AND deleted_at IS NULL");
+    return $stmt->execute([$title, $content, $status, $categoryId, $id]);
 }
 
 function delete_post($id) {
-    $db = db();
-    $stmt = $db->prepare("UPDATE posts SET deleted_at = NOW() WHERE id = ? AND deleted_at IS NULL");
+    $stmt = db()->prepare("UPDATE posts SET deleted_at = NOW() WHERE id = ? AND deleted_at IS NULL");
     $stmt->execute([$id]);
     return $stmt->rowCount();
 }

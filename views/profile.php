@@ -70,8 +70,6 @@
     <?php endif; ?>
 </div>
 
-<!-- enctype is mandatory: without it the browser sends the filename as plain text
-     and $_FILES is empty, so every upload looks like "no file chosen". -->
 <form method="post" action="/profile/details" enctype="multipart/form-data" novalidate>
     <?= csrf_field() ?>
     <div>
