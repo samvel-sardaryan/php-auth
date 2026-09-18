@@ -60,3 +60,34 @@ function delete_post($id) {
     $stmt->execute([$id]);
     return $stmt->rowCount();
 }
+
+function add_post_images($postId, array $files) {
+    $db = db();
+    $stmt = $db->prepare("INSERT INTO post_images (post_id, path) VALUES (?, ?)");
+    foreach ($files as $file) {
+        $stmt->execute([$postId, $file]);
+    }
+}
+
+function images_for_post($postId) {
+    $stmt = db()->prepare("SELECT path FROM post_images WHERE post_id = ? ORDER BY id");
+    $stmt->execute([$postId]);
+    return $stmt->fetchAll(PDO::FETCH_COLUMN);
+}
+
+function images_for_posts(array $postIds) {
+    if (empty($postIds)) {
+        return [];
+    }
+
+    $placeholders = rtrim(str_repeat('?,', count($postIds)), ',');
+    $stmt = db()->prepare("SELECT post_id, path FROM post_images WHERE post_id IN ($placeholders) ORDER BY id");
+    $stmt->execute($postIds);
+
+    $grouped = [];
+    while ($row = $stmt->fetch()) {
+        $grouped[$row['post_id']][] = $row['path'];
+    }
+
+    return $grouped;
+}

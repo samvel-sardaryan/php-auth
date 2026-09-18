@@ -10,6 +10,7 @@ require_once __DIR__ . '/../src/profiles.php';
 require_once __DIR__ . '/../src/upload.php';
 require_once __DIR__ . '/../src/posts.php';
 require_once __DIR__ . '/../src/categories.php';
+require_once __DIR__ . '/../src/tags.php';
 require_once __DIR__ . '/../handlers/auth.php';
 require_once __DIR__ . '/../handlers/pages.php';
 require_once __DIR__ . '/../handlers/admin.php';
@@ -76,6 +77,7 @@ $routes = [
     'POST /admin/categories/create' => 'post_category_create',
     'POST /admin/categories/rename' => 'post_category_rename',
     'POST /admin/categories/delete' => 'post_category_delete',
+    'GET /posts/show' => 'show_post',
 ];
 
 $lookup = $method . ' ' . $path;

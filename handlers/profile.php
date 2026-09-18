@@ -6,7 +6,7 @@ function show_profile() {
     require_login();
     $user = current_user();
     $profile = get_profile($user['id']);
-    $posts = list_user_posts($user['id'] ?? null, $user['id'] ?? null, can('manage_posts'));
+    $posts = attach_post_extras(list_user_posts($user['id'] ?? null, $user['id'] ?? null, can('manage_posts')));
     $errors = flash_get('errors') ?? [];
     $old = flash_get('old') ?? [];
     $success = flash_get('success');
@@ -177,7 +177,7 @@ function show_user_profile() {
     }
 
     $profile = get_profile($user['id']);
-    $posts = list_user_posts($user['id']);
+    $posts = attach_post_extras(list_user_posts($user['id']));
 
     require __DIR__ . '/../views/user-profile.php';
 }
