@@ -11,12 +11,15 @@ require_once __DIR__ . '/../src/upload.php';
 require_once __DIR__ . '/../src/posts.php';
 require_once __DIR__ . '/../src/categories.php';
 require_once __DIR__ . '/../src/tags.php';
+require_once __DIR__ . '/../src/comments.php';
+
 require_once __DIR__ . '/../handlers/auth.php';
 require_once __DIR__ . '/../handlers/pages.php';
 require_once __DIR__ . '/../handlers/admin.php';
 require_once __DIR__ . '/../handlers/profile.php';
 require_once __DIR__ . '/../handlers/categories.php';
 require_once __DIR__ . '/../handlers/posts.php';
+require_once __DIR__ . '/../handlers/comments.php';
 
 $path = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/', '/') ?: '/';
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -78,6 +81,10 @@ $routes = [
     'POST /admin/categories/rename' => 'post_category_rename',
     'POST /admin/categories/delete' => 'post_category_delete',
     'GET /posts/show' => 'show_post',
+    'POST /comments/create' => 'post_comment_create',
+    'GET /comments/edit' => 'show_comment_edit',
+    'POST /comments/edit' => 'post_comment_edit',
+    'POST /comments/delete' => 'post_comment_delete',
 ];
 
 $lookup = $method . ' ' . $path;

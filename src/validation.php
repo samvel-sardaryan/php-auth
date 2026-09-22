@@ -194,3 +194,15 @@ function validate_category($name, $slug) {
 
     return $errors;
 }
+
+function validate_comment($content) {
+    $errors = [];
+
+    if (trim($content) === '') {
+        $errors['content'] = 'Comment is required.';
+    } elseif (mb_strlen($content) > 2000) {
+        $errors['content'] = 'Maximum 2000 characters.';
+    }
+
+    return $errors;
+}

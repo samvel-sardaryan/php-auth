@@ -57,3 +57,25 @@ function require_role($roleName) {
         deny();
     }
 }
+
+function owns_comment($comment) {
+    $user = current_user();
+    if (!$user) return false;
+    if (!$comment) return false;
+
+    return $user['id'] === (int) $comment['user_id'];
+}
+
+function require_comment_editor($comment) {
+    require_verified();
+    if (!owns_comment($comment)) {
+        deny();
+    }
+}
+
+function require_comment_deleter($comment, $post) {
+    require_verified();
+    if (!can('moderate_comments') && !owns_comment($comment) && !owns_post($post)) {
+        deny();
+    }
+}

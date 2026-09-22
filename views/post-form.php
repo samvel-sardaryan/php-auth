@@ -57,16 +57,25 @@
         <?php endif; ?>
         <p class="hint">A draft is visible only to you. Archived posts stay off the feed.</p>
     </div>
-    <?php if (!$isEdit): ?>
+    <?php if (!empty($images)): ?>
         <div>
-            <label for="images">Images</label>
-            <input type="file" id="images" name="images[]" accept="image/*" multiple>
-            <p class="hint">JPG, PNG, GIF or WEBP, up to 2MB each, <?= e(POST_IMAGE_MAX_COUNT) ?> at most.</p>
-            <?php if (isset($errors['images'])): ?>
-                <span class="error"><?= e($errors['images']) ?></span>
-            <?php endif; ?>
+            <p>Current images</p>
+            <?php foreach ($images as $image): ?>
+                <label class="image-choice">
+                    <img src="/uploads/posts/<?= e($image['path']) ?>" alt="" width="120">
+                    <input type="checkbox" name="remove_images[]" value="<?= e($image['id']) ?>"> Remove
+                </label>
+            <?php endforeach; ?>
         </div>
     <?php endif; ?>
+    <div>
+        <label for="images"><?= $isEdit ? 'Add images' : 'Images' ?></label>
+        <input type="file" id="images" name="images[]" accept="image/*" multiple>
+        <p class="hint">JPG, PNG, GIF or WEBP, up to 2MB each, <?= e(POST_IMAGE_MAX_COUNT) ?> in total.<?= $isEdit ? ' If saving fails, choose the files again.' : '' ?></p>
+        <?php if (isset($errors['images'])): ?>
+            <span class="error"><?= e($errors['images']) ?></span>
+        <?php endif; ?>
+    </div>
     <button type="submit"><?= $isEdit ? 'Save changes' : 'Publish' ?></button>
 </form>
 

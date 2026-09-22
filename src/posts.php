@@ -70,9 +70,9 @@ function add_post_images($postId, array $files) {
 }
 
 function images_for_post($postId) {
-    $stmt = db()->prepare("SELECT path FROM post_images WHERE post_id = ? ORDER BY id");
+    $stmt = db()->prepare("SELECT id, path FROM post_images WHERE post_id = ? ORDER BY id");
     $stmt->execute([$postId]);
-    return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    return $stmt->fetchAll();
 }
 
 function images_for_posts(array $postIds) {
@@ -90,4 +90,14 @@ function images_for_posts(array $postIds) {
     }
 
     return $grouped;
+}
+
+function delete_post_images($postId, array $imageIds) {
+    if (empty($imageIds)) {
+        return;
+    }
+
+    $placeholders = rtrim(str_repeat('?,', count($imageIds)), ',');
+    $stmt = db()->prepare("DELETE FROM post_images WHERE post_id = ? AND id IN ($placeholders)");
+    $stmt->execute([$postId, ...$imageIds]);
 }

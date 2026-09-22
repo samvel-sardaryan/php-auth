@@ -1,5 +1,5 @@
 <article class="post">
-    <h3><?= e($post['title']) ?></h3>
+    <h3><a href="/posts/show?id=<?= e($post['id']) ?>"><?= e($post['title']) ?></a></h3>
     <p class="meta">
         by <a href="/users?id=<?= e($post['user_id']) ?>"><?= e($post['author_name']) ?></a>
         in <?= e($post['category_name']) ?>
