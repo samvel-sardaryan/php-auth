@@ -12,6 +12,7 @@ require_once __DIR__ . '/../src/posts.php';
 require_once __DIR__ . '/../src/categories.php';
 require_once __DIR__ . '/../src/tags.php';
 require_once __DIR__ . '/../src/comments.php';
+require_once __DIR__ . '/../src/likes.php';
 
 require_once __DIR__ . '/../handlers/auth.php';
 require_once __DIR__ . '/../handlers/pages.php';
@@ -85,6 +86,7 @@ $routes = [
     'GET /comments/edit' => 'show_comment_edit',
     'POST /comments/edit' => 'post_comment_edit',
     'POST /comments/delete' => 'post_comment_delete',
+    'POST /posts/like' => 'post_post_like',
 ];
 
 $lookup = $method . ' ' . $path;

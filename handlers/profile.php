@@ -6,7 +6,7 @@ function show_profile() {
     require_login();
     $user = current_user();
     $profile = get_profile($user['id']);
-    $posts = attach_post_extras(list_user_posts($user['id'] ?? null, $user['id'] ?? null, can('manage_posts')));
+    $posts = attach_post_extras(list_user_posts($user['id'] ?? null, $user['id'] ?? null, can('manage_posts')), $user['id'] ?? null);
     $errors = flash_get('errors') ?? [];
     $old = flash_get('old') ?? [];
     $success = flash_get('success');
@@ -164,7 +164,6 @@ function post_profile_avatar_delete() {
 }
 
 function show_user_profile() {
-    require_verified();
     $user = find_user((int) ($_GET['id'] ?? 0));
     if (!$user) {
         http_response_code(404);
@@ -172,12 +171,13 @@ function show_user_profile() {
         exit;
     }
 
-    if (current_user()['id'] === $user['id']) {
+    $viewer = current_user();
+    if (($viewer['id'] ?? null) === $user['id']) {
         redirect('/profile');
     }
 
     $profile = get_profile($user['id']);
-    $posts = attach_post_extras(list_user_posts($user['id']));
+    $posts = attach_post_extras(list_user_posts($user['id']), $viewer['id'] ?? null);
 
     require __DIR__ . '/../views/user-profile.php';
 }

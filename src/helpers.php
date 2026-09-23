@@ -45,3 +45,13 @@ function csrf_verify($token) {
     }
     return false;
 }
+
+function local_path($path, $fallback) {
+    if (!is_string($path) || $path === '' || $path[0] !== '/') {
+        return $fallback;
+    }
+    if (isset($path[1]) && ($path[1] === '/' || $path[1] === "\\")) {
+        return $fallback;
+    }
+    return $path;
+}

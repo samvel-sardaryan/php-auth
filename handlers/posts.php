@@ -21,7 +21,7 @@ function normalise_files_array($file) {
     return $normalised;
 }
 
-function attach_post_extras(array $posts) {
+function attach_post_extras(array $posts, $viewerId = null) {
     if (empty($posts)) {
         return $posts;
     }
@@ -36,15 +36,51 @@ function attach_post_extras(array $posts) {
     }
     unset($post);
 
+    if ($viewerId) {
+        $liked = liked_by(array_column($posts, 'id'), $viewerId);
+        foreach ($posts as &$post) {
+            $post['liked'] = in_array($post['id'], $liked);
+        }
+        unset($post);
+    }
+
     return $posts;
 }
 
+function feed_url(array $p, int $page) {
+    $q = [];
+    if ($p['category'] !== null) {
+        $q['category'] = $p['category'];
+    }
+    if ($p['author'] !== null) {
+        $q['author'] = $p['author'];
+    }
+    if ($p['tag'] !== '') {
+        $q['tag'] = $p['tag'];
+    }
+    if ($p['q'] !== '') {
+        $q['q'] = $p['q'];
+    }
+    if ($p['sort'] !== 'newest') {
+        $q['sort'] = $p['sort'];
+    }
+    $q['page'] = $page;
+    return '/posts?' . http_build_query($q);
+}
+
 function show_posts() {
-    require_verified();
     $user = current_user();
-    $posts = attach_post_extras(list_posts());
     $error = flash_get('error');
     $success = flash_get('success');
+    $p = read_feed_params();
+    $total = count_posts($p);
+    $pages = max(1, (int) ceil($total / $p['limit']));
+    if ($p['page'] > $pages) {
+        $p['page'] = $pages;
+    }
+    $p['offset'] = ($p['page'] - 1) * $p['limit'];
+    $posts = attach_post_extras(list_feed($p), $user['id'] ?? null);
+    $categories = all_categories();
     require __DIR__ . '/../views/posts.php';
 }
 
@@ -290,7 +326,7 @@ function show_post() {
     }
 
     $comments = comments_for_post($post['id']);
-    $post = attach_post_extras([$post])[0];
+    $post = attach_post_extras([$post], $user['id'] ?? null)[0];
     $replyTo = (int) ($_GET['reply_to'] ?? 0) ?: null;
 
     $success = flash_get('success');
@@ -299,4 +335,41 @@ function show_post() {
     $old = flash_get('old');
 
     require __DIR__ . '/../views/post.php';
+}
+
+function post_post_like() {
+    require_verified();
+    $user = current_user();
+    $postId = (int) ($_POST['id'] ?? 0);
+    $post = find_post($postId, $user['id'] ?? null, can('manage_posts'));
+    if (!$post) {
+        http_response_code(404);
+        echo '404 Not Found';
+        exit;
+    }
+
+    if ($post['status'] !== 'published') {
+        flash_set('error', 'Post is not published.');
+        redirect('/posts');
+    }
+
+    $result = toggle_like($user['id'], $postId);
+    flash_set('success', $result === 'liked' ? 'Post liked.' : 'Like removed.');
+    redirect(local_path($_POST['back'] ?? '', '/posts/show?id=' . $postId));
+}
+
+function read_feed_params() {
+    $page = max(1, (int)($_GET['page'] ?? 1));
+    $sort = (string)($_GET['sort'] ?? '');
+    $sort = isset(FEED_SORTS[$sort]) ? $sort : 'newest';
+    $category = (int)($_GET['category'] ?? 0) ?: null;
+    $author = (int)($_GET['author'] ?? 0) ?: null;
+    $tag = trim($_GET['tag'] ?? '');
+    $q = trim($_GET['q'] ?? '');
+    $viewerId = null;
+    $seeAll = false;
+    $limit = 10;
+    $offset = (int)($page - 1) * $limit;
+
+    return compact('page', 'sort', 'category', 'author', 'tag', 'q', 'viewerId', 'seeAll', 'limit', 'offset');
 }

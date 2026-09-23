@@ -4,7 +4,15 @@ require_once __DIR__ . '/db.php';
 
 const STATUS_TYPES = ['draft', 'published', 'archived'];
 
-const POST_SELECT = "SELECT posts.*, users.name AS author_name, categories.name AS category_name
+const FEED_SORTS = [
+    'newest' => 'ORDER BY created_at DESC, posts.id DESC',
+    'liked' => 'ORDER BY like_count DESC, posts.id DESC',
+    'commented' => 'ORDER BY comment_count DESC, posts.id DESC'
+];
+
+const POST_SELECT = "SELECT posts.*, users.name AS author_name, categories.name AS category_name,
+    (SELECT COUNT(*) FROM post_likes pl WHERE pl.post_id = posts.id) AS like_count,
+    (SELECT COUNT(*) FROM comments c WHERE c.post_id = posts.id AND c.deleted_at IS NULL) AS comment_count
     FROM posts
     JOIN users ON users.id = posts.user_id
     JOIN categories ON categories.id = posts.category_id";
@@ -100,4 +108,51 @@ function delete_post_images($postId, array $imageIds) {
     $placeholders = rtrim(str_repeat('?,', count($imageIds)), ',');
     $stmt = db()->prepare("DELETE FROM post_images WHERE post_id = ? AND id IN ($placeholders)");
     $stmt->execute([$postId, ...$imageIds]);
+}
+
+function feed_where(array $p) {
+    [$sql, $params] = post_visibility($p['viewerId'], $p['seeAll']);
+
+    if ($p['category']) {
+        $sql .= ' AND posts.category_id = ?';
+        $params[] = $p['category'];
+    }
+
+    if ($p['author']) {
+        $sql .= ' AND posts.user_id = ?';
+        $params[] = $p['author'];
+    }
+
+    if (!empty($p['tag'])) {
+        $sql .= ' AND posts.id IN (SELECT post_id FROM post_tag pt JOIN tags t ON t.id = pt.tag_id WHERE t.name = ?)';
+        $params[] = $p['tag'];
+    }
+
+    if (!empty($p['q'])) {
+        $sql .= ' AND (posts.title LIKE ? OR posts.content LIKE ?)';
+        $params[] = '%' . $p['q'] . '%';
+        $params[] = '%' . $p['q'] . '%';
+    }
+
+    return [$sql, $params];
+}
+
+function count_posts(array $p) {
+    [$where, $params] = feed_where($p);
+    $sql = "SELECT COUNT(*) FROM posts JOIN users ON users.id = posts.user_id JOIN categories ON categories.id = posts.category_id WHERE $where";
+    $stmt = db()->prepare($sql);
+    $stmt->execute($params);
+    return (int) $stmt->fetchColumn();
+}
+
+function list_feed(array $p) {
+    [$where, $params] = feed_where($p);
+
+    $sortSql = FEED_SORTS[$p['sort'] ?? 'newest'] ?? FEED_SORTS['newest'];
+    $sql = POST_SELECT . " WHERE $where $sortSql LIMIT ? OFFSET ?";
+    $params[] = $p['limit'];
+    $params[] = $p['offset'];
+    $stmt = db()->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->fetchAll();
 }

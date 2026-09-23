@@ -53,7 +53,7 @@ function show_comment_edit() {
         exit;
     }
 
-    $post = find_post($comment['post_id']);
+    $post = find_post($comment['post_id'], null, true);
 
     if (!$post) {
         http_response_code(404);
@@ -84,7 +84,7 @@ function post_comment_edit() {
 
     require_comment_editor($comment);
 
-    $post = find_post($comment['post_id']);
+    $post = find_post($comment['post_id'], null, true);
     $content = trim($_POST['content'] ?? '');
 
     if (!$post) {
@@ -117,7 +117,7 @@ function post_comment_delete() {
         exit;
     }
 
-    $post = find_post($comment['post_id']);
+    $post = find_post($comment['post_id'], null, true);
 
     if (!$post) {
         http_response_code(404);
