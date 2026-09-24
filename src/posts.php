@@ -156,3 +156,27 @@ function list_feed(array $p) {
     $stmt->execute($params);
     return $stmt->fetchAll();
 }
+
+function list_deleted_posts() {
+    $stmt = db()->prepare(POST_SELECT . " WHERE posts.deleted_at IS NOT NULL ORDER BY posts.deleted_at DESC, posts.id DESC");
+    $stmt->execute();
+    return $stmt->fetchAll();
+}
+
+function find_deleted_post($id) {
+    $stmt = db()->prepare(POST_SELECT . " WHERE posts.id = ? AND posts.deleted_at IS NOT NULL");
+    $stmt->execute([$id]);
+    return $stmt->fetch();
+}
+
+function restore_post($id) {
+    $stmt = db()->prepare("UPDATE posts SET deleted_at = NULL WHERE id = ? AND deleted_at IS NOT NULL");
+    $stmt->execute([$id]);
+    return $stmt->rowCount();
+}
+
+function hard_delete_post($id) {
+    $stmt = db()->prepare("DELETE FROM posts WHERE id = ? AND deleted_at IS NOT NULL");
+    $stmt->execute([$id]);
+    return $stmt->rowCount();
+}

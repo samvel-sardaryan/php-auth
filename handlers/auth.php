@@ -49,7 +49,9 @@ function show_login() {
 
 function post_login() {
     require_guest();
+
     $email = trim($_POST['email'] ?? '');
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
     $password = $_POST['password'] ?? '';
     $error = null;
     $success = null;
@@ -60,14 +62,23 @@ function post_login() {
         return;
     }
 
+    if (too_many_login_attempts($email, $ip)) {
+        log_activity('login.blocked');
+        flash_set('error', 'Too many login attempts. Please try again later.');
+        redirect('/login');
+    }
+
     $id = attempt_login($email, $password);
 
     if ($id === null) {
+        record_failed_login($email, $ip);
+        log_activity('login.failed');
         $error = 'Invalid email or password.';
         require __DIR__ . '/../views/login.php';
         return;
     }
 
+    clear_login_attempts($email);
     login_user($id);
     redirect('/dashboard');
 }
@@ -187,6 +198,7 @@ function post_reset() {
     }
 
     reset_user_password($user, $password);
+    log_activity('password.reset', 'user', $user);
     flash_set('success', 'Password reset successfully. You can now log in.');
     redirect('/login');
 }

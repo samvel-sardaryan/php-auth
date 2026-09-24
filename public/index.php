@@ -13,6 +13,9 @@ require_once __DIR__ . '/../src/categories.php';
 require_once __DIR__ . '/../src/tags.php';
 require_once __DIR__ . '/../src/comments.php';
 require_once __DIR__ . '/../src/likes.php';
+require_once __DIR__ . '/../src/reports.php';
+require_once __DIR__ . '/../src/ratelimit.php';
+require_once __DIR__ . '/../src/activity.php';
 
 require_once __DIR__ . '/../handlers/auth.php';
 require_once __DIR__ . '/../handlers/pages.php';
@@ -21,6 +24,7 @@ require_once __DIR__ . '/../handlers/profile.php';
 require_once __DIR__ . '/../handlers/categories.php';
 require_once __DIR__ . '/../handlers/posts.php';
 require_once __DIR__ . '/../handlers/comments.php';
+require_once __DIR__ . '/../handlers/moderation.php';
 
 $path = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/', '/') ?: '/';
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -87,6 +91,12 @@ $routes = [
     'POST /comments/edit' => 'post_comment_edit',
     'POST /comments/delete' => 'post_comment_delete',
     'POST /posts/like' => 'post_post_like',
+    'POST /reports/create' => 'post_report_create',
+    'POST /moderation/hide-post' => 'post_moderation_hide_post',
+    'POST /moderation/hide-comment' => 'post_moderation_hide_comment',
+    'GET /admin/deleted-posts' => 'show_deleted_posts',
+    'POST /admin/deleted-posts/restore' => 'post_restore_post',
+    'GET /admin/activity' => 'show_activity',
 ];
 
 $lookup = $method . ' ' . $path;

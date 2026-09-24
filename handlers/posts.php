@@ -100,11 +100,17 @@ function show_post_create() {
 
 function post_post_create() {
     require_verified();
+
+    $user = current_user();
+    if (too_many_posts($user['id'])) {
+        flash_set('error', 'Too many posts. Please try again later.');
+        redirect('/posts/create');
+    }
+
     $title = trim($_POST['title'] ?? '');
     $content = trim($_POST['content'] ?? '');
     $status = $_POST['status'] ?? '';
     $categoryId = (int) ($_POST['category_id'] ?? 0);
-    $user = current_user();
     $errors = validate_post($title, $content, $status, $categoryId);
     $tags = $_POST['tags'] ?? '';
     $old = [
@@ -167,6 +173,7 @@ function post_post_create() {
         redirect('/posts/create');
     }
 
+    log_activity('post.created', 'post', $postId);
     flash_set('success', 'Post created successfully.');
     redirect('/posts');
 }
@@ -293,6 +300,8 @@ function post_post_edit() {
     foreach ($removedPaths as $path) {
         delete_post_image_file($path);
     }
+
+    log_activity('post.updated', 'post', $post['id']);
     flash_set('success', 'Post updated successfully.');
     redirect('/posts');
 }
@@ -311,6 +320,7 @@ function post_post_delete() {
     require_post_owner($post);
 
     delete_post($post['id']);
+    log_activity('post.deleted', 'post', $post['id']);
     flash_set('success', 'Post deleted successfully.');
     redirect('/posts');
 }

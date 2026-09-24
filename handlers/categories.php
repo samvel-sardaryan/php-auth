@@ -1,5 +1,7 @@
 <?php
 
+// Admin category management.
+
 function show_categories() {
     require_permission('access_admin_page');
     $categories = all_categories();

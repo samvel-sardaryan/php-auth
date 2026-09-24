@@ -41,6 +41,16 @@ $viewer = $viewer ?? current_user();
             </form>
         <?php endif; ?>
     </p>
+    <?php if ($viewer && is_verified($viewer) && (int) $post['user_id'] !== (int) $viewer['id']): ?>
+        <form method="post" action="/reports/create" class="report">
+            <?= csrf_field() ?>
+            <input type="hidden" name="target_type" value="post">
+            <input type="hidden" name="id" value="<?= e($post['id']) ?>">
+            <input type="hidden" name="back" value="<?= e($_SERVER['REQUEST_URI'] ?? '/posts') ?>">
+            <input type="text" name="reason" maxlength="255" placeholder="Report this post: why?">
+            <button type="submit">Report</button>
+        </form>
+    <?php endif; ?>
     <?php if (owns_post($post) || can('manage_posts')): ?>
         <p class="actions">
             <a href="/posts/edit?id=<?= e($post['id']) ?>">Edit</a>

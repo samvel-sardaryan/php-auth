@@ -1,7 +1,11 @@
 <?php
 
+// Comments and replies on a post.
+
 function post_comment_create() {
     require_verified();
+
+    $user = current_user();
     $post = find_post((int)($_POST['post_id'] ?? 0));
     $parentId = (int)($_POST['parent_id'] ?? 0);
     $content = trim($_POST['content'] ?? '');
@@ -10,6 +14,11 @@ function post_comment_create() {
         http_response_code(404);
         echo '404 Not Found';
         exit;
+    }
+
+    if (too_many_comments($user['id'])) {
+        flash_set('error', 'Too many comments. Please try again later.');
+        redirect('/posts/show?id=' . $post['id']);
     }
 
     if ($parentId === 0) {

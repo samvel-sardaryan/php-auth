@@ -14,8 +14,3 @@ function show_admin() {
     require_permission('access_admin_page');
     require __DIR__ . '/../views/admin.php';
 }
-
-function show_moderator() {
-    require_permission('access_moderator_page');
-    require __DIR__ . '/../views/moderator.php';
-}

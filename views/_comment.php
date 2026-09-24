@@ -16,6 +16,16 @@ $canReply = $canAct && $comment['parent_id'] === null && $post['status'] === 'pu
         </p>
         <div class="content"><?= nl2br(e($comment['content'])) ?></div>
 
+        <?php if ($canAct && !$isMine): ?>
+            <form method="post" action="/reports/create" class="report">
+                <?= csrf_field() ?>
+                <input type="hidden" name="target_type" value="comment">
+                <input type="hidden" name="id" value="<?= e($comment['id']) ?>">
+                <input type="hidden" name="back" value="<?= e($_SERVER['REQUEST_URI'] ?? '/posts') ?>">
+                <input type="text" name="reason" maxlength="255" placeholder="Report this comment: why?">
+                <button type="submit">Report</button>
+            </form>
+        <?php endif; ?>
         <?php if ($isMine || $canDelete || $canReply): ?>
             <p class="actions">
                 <?php if ($canReply): ?>
