@@ -1,6 +1,9 @@
+<?php $title = $user['name']; ?>
+<?php require __DIR__ . '/_header.php'; ?>
+
 <h1><?= e($user['name']) ?></h1>
-<p><span class="label">Role:</span> <?= e($user['role_name']) ?></p>
-<p><span class="label">Joined:</span> <?= e($user['created_at']) ?></p>
+<p><span>Role:</span> <?= e($user['role_name']) ?></p>
+<p><span>Joined:</span> <?= e($user['created_at']) ?></p>
 
 <div>
     <?php if ($profile['avatar']): ?>
@@ -26,7 +29,7 @@ $filled = array_filter($details, fn($v) => $v !== null && $v !== '');
     <p class="hint">This user has not filled in their profile yet.</p>
 <?php else: ?>
     <?php foreach ($filled as $label => $value): ?>
-        <p><span class="label"><?= e($label) ?>:</span> <?= nl2br(e($value)) ?></p>
+        <p><span><?= e($label) ?>:</span> <?= nl2br(e($value)) ?></p>
     <?php endforeach; ?>
 <?php endif; ?>
 
@@ -40,3 +43,5 @@ $filled = array_filter($details, fn($v) => $v !== null && $v !== '');
 <?php endif; ?>
 
 <a href="/dashboard">Back to dashboard</a>
+
+<?php require __DIR__ . '/_footer.php'; ?>

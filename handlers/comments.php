@@ -137,6 +137,11 @@ function post_comment_delete() {
     require_comment_deleter($comment, $post);
 
     delete_comment($comment['id']);
+    if (owns_comment($comment)) {
+        log_activity('comment.deleted', 'comment', $comment['id']);
+    } else {
+        log_activity('comment.deleted_by_moderator', 'comment', $comment['id']);
+    }
     flash_set('success', 'Comment deleted successfully.');
     redirect('/posts/show?id=' . $post['id']);
 }

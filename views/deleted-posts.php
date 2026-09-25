@@ -1,3 +1,6 @@
+<?php $title = 'Deleted Posts'; ?>
+<?php require __DIR__ . '/_header.php'; ?>
+
 <h1>Deleted posts</h1>
 
 <?php if ($success): ?>
@@ -49,3 +52,5 @@
 <?php endif; ?>
 
 <a href="/admin">Back to admin</a>
+
+<?php require __DIR__ . '/_footer.php'; ?>

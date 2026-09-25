@@ -1,3 +1,6 @@
+<?php $title = 'Activity Log'; ?>
+<?php require __DIR__ . '/_header.php'; ?>
+
 <h1>Activity log</h1>
 
 <?php if ($success): ?>
@@ -35,7 +38,6 @@
         </tr>
         <?php foreach ($activity as $row): ?>
             <?php
-            // target_id has no foreign key: it may point at something that is gone
             $link = null;
             if ($row['target_type'] === 'post' && $row['target_id'] !== null) {
                 $link = '/posts/show?id=' . $row['target_id'];
@@ -88,3 +90,5 @@
 <?php endif; ?>
 
 <a href="/admin">Back to admin</a>
+
+<?php require __DIR__ . '/_footer.php'; ?>

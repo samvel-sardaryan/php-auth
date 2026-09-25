@@ -1,4 +1,7 @@
+<?php $title = 'Categories'; ?>
+<?php require __DIR__ . '/_header.php'; ?>
 <?php $counts = $counts ?? []; ?>
+
 
 <h1>Categories</h1>
 
@@ -46,7 +49,7 @@
                         <span class="hint">Cannot be deleted</span>
                     <?php else: ?>
                         <form method="post" action="/admin/categories/delete"
-                              onsubmit="return confirm('Delete this category? Its posts move to the default category.')">
+                            onsubmit="return confirm('Delete this category? Its posts move to the default category.')">
                             <?= csrf_field() ?>
                             <input type="hidden" name="id" value="<?= e($category['id']) ?>">
                             <button type="submit">Delete</button>
@@ -80,3 +83,5 @@
 </form>
 
 <a href="/admin">Back to admin</a>
+
+<?php require __DIR__ . '/_footer.php'; ?>

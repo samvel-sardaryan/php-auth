@@ -320,7 +320,11 @@ function post_post_delete() {
     require_post_owner($post);
 
     delete_post($post['id']);
-    log_activity('post.deleted', 'post', $post['id']);
+    if (owns_post($post)) {
+        log_activity('post.deleted', 'post', $post['id']);
+    } else {
+        log_activity('post.deleted_by_moderator', 'post', $post['id']);
+    }
     flash_set('success', 'Post deleted successfully.');
     redirect('/posts');
 }

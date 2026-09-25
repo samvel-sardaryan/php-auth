@@ -1,37 +1,6 @@
 <?php $viewer = current_user(); ?>
-
-<style>
-    .comment {
-        padding: .4rem 0 .4rem .6rem;
-        border-left: 3px solid #d8d8d8;
-        margin: .6rem 0;
-    }
-
-    .comment .meta {
-        color: #666;
-        font-size: .9em;
-        margin: 0 0 .3rem;
-    }
-
-    .comment .actions {
-        margin: .3rem 0 0;
-        font-size: .9em;
-    }
-
-    .comment .actions form {
-        display: inline;
-    }
-
-    .replies {
-        margin-left: 2rem;
-        border-left: 2px dashed #ccc;
-        padding-left: .8rem;
-    }
-
-    .replies .comment {
-        border-left-color: #e8e8e8;
-    }
-</style>
+<?php $title = $post['title']; ?>
+<?php require __DIR__ . '/_header.php'; ?>
 
 <?php if ($success): ?>
     <p class="success"><?= e($success) ?></p>
@@ -90,3 +59,5 @@
 </section>
 
 <a href="/posts">Back to posts</a>
+
+<?php require __DIR__ . '/_footer.php'; ?>

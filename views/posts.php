@@ -1,4 +1,7 @@
 <?php $viewer = current_user(); ?>
+<?php $title = 'Posts'; ?>
+<?php require __DIR__ . '/_header.php'; ?>
+
 
 <h1>Posts</h1>
 
@@ -68,3 +71,5 @@
 <?php endif; ?>
 
 <a href="/dashboard">Back to dashboard</a>
+
+<?php require __DIR__ . '/_footer.php'; ?>

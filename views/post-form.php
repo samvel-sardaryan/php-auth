@@ -1,4 +1,6 @@
 <?php $isEdit = $post !== null; ?>
+<?php $title = $isEdit ? 'Edit post' : 'New post'; ?>
+<?php require __DIR__ . '/_header.php'; ?>
 
 <h1><?= $isEdit ? 'Edit post' : 'New post' ?></h1>
 
@@ -80,3 +82,5 @@
 </form>
 
 <a href="/posts">Back to posts</a>
+
+<?php require __DIR__ . '/_footer.php'; ?>

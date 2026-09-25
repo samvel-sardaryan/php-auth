@@ -1,3 +1,6 @@
+<?php $title = 'Moderation'; ?>
+<?php require __DIR__ . '/_header.php'; ?>
+
 <h1>Moderation queue</h1>
 
 <?php if ($success): ?>
@@ -23,7 +26,6 @@
             <?php
             $target = $report['target'] ?? null;
             $isPost = $report['target_type'] === 'post';
-            // a comment lives on a post, so its link is the post page plus the comment anchor
             $link = $target === null ? null
                 : ($isPost
                     ? '/posts/show?id=' . $target['id']
@@ -51,13 +53,11 @@
                 <td><?= e($report['reporter_name']) ?></td>
                 <td>
                     <?php
-                    // each action is gated on its own permission, so a role with only
-                    // moderate_comments sees the queue but cannot hide a post
                     $may = $isPost ? can('moderate_posts') : can('moderate_comments');
                     ?>
                     <?php if ($target !== null && $target['deleted_at'] === null && $may): ?>
                         <form method="post" action="/moderation/hide-<?= $isPost ? 'post' : 'comment' ?>"
-                              onsubmit="return confirm('Hide this <?= $isPost ? 'post' : 'comment' ?>?')">
+                            onsubmit="return confirm('Hide this <?= $isPost ? 'post' : 'comment' ?>?')">
                             <?= csrf_field() ?>
                             <input type="hidden" name="id" value="<?= e($target['id']) ?>">
                             <button type="submit">Hide</button>
@@ -70,3 +70,5 @@
 <?php endif; ?>
 
 <a href="/dashboard">Back to dashboard</a>
+
+<?php require __DIR__ . '/_footer.php'; ?>

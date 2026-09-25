@@ -1,8 +1,4 @@
-<?php
-// current_user() costs a query, so look it up once: this file shares the scope of the
-// loop that includes it, so $viewer survives to the next post.
-$viewer = $viewer ?? current_user();
-?>
+<?php $viewer = $viewer ?? current_user(); ?>
 <article class="post">
     <h3><a href="/posts/show?id=<?= e($post['id']) ?>"><?= e($post['title']) ?></a></h3>
     <p class="meta">
@@ -13,7 +9,7 @@ $viewer = $viewer ?? current_user();
             <span class="status-badge"><?= e(strtoupper($post['status'])) ?></span>
         <?php endif; ?>
     </p>
-    <div class="content"><?= nl2br(e($post['content'])) ?></div>
+    <div><?= nl2br(e($post['content'])) ?></div>
     <?php if (!empty($post['images'])): ?>
         <p class="images">
             <?php foreach ($post['images'] as $image): ?>
@@ -33,32 +29,32 @@ $viewer = $viewer ?? current_user();
         &middot;
         <a href="/posts/show?id=<?= e($post['id']) ?>#comments"><?= e($post['comment_count'] ?? 0) ?> comments</a>
         <?php if ($viewer && is_verified($viewer) && $post['status'] === 'published'): ?>
-            <form method="post" action="/posts/like">
-                <?= csrf_field() ?>
-                <input type="hidden" name="id" value="<?= e($post['id']) ?>">
-                <input type="hidden" name="back" value="<?= e($_SERVER['REQUEST_URI'] ?? '/posts') ?>">
-                <button type="submit"><?= !empty($post['liked']) ? 'Unlike' : 'Like' ?></button>
-            </form>
-        <?php endif; ?>
+    <form method="post" action="/posts/like">
+        <?= csrf_field() ?>
+        <input type="hidden" name="id" value="<?= e($post['id']) ?>">
+        <input type="hidden" name="back" value="<?= e($_SERVER['REQUEST_URI'] ?? '/posts') ?>">
+        <button type="submit"><?= !empty($post['liked']) ? 'Unlike' : 'Like' ?></button>
+    </form>
+<?php endif; ?>
+</p>
+<?php if ($viewer && is_verified($viewer) && (int) $post['user_id'] !== (int) $viewer['id']): ?>
+    <form method="post" action="/reports/create" class="report">
+        <?= csrf_field() ?>
+        <input type="hidden" name="target_type" value="post">
+        <input type="hidden" name="id" value="<?= e($post['id']) ?>">
+        <input type="hidden" name="back" value="<?= e($_SERVER['REQUEST_URI'] ?? '/posts') ?>">
+        <input type="text" name="reason" maxlength="255" placeholder="Report this post: why?">
+        <button type="submit">Report</button>
+    </form>
+<?php endif; ?>
+<?php if (owns_post($post) || can('manage_posts')): ?>
+    <p class="actions">
+        <a href="/posts/edit?id=<?= e($post['id']) ?>">Edit</a>
+    <form method="post" action="/posts/delete" onsubmit="return confirm('Delete this post?')">
+        <?= csrf_field() ?>
+        <input type="hidden" name="id" value="<?= e($post['id']) ?>">
+        <button type="submit">Delete</button>
+    </form>
     </p>
-    <?php if ($viewer && is_verified($viewer) && (int) $post['user_id'] !== (int) $viewer['id']): ?>
-        <form method="post" action="/reports/create" class="report">
-            <?= csrf_field() ?>
-            <input type="hidden" name="target_type" value="post">
-            <input type="hidden" name="id" value="<?= e($post['id']) ?>">
-            <input type="hidden" name="back" value="<?= e($_SERVER['REQUEST_URI'] ?? '/posts') ?>">
-            <input type="text" name="reason" maxlength="255" placeholder="Report this post: why?">
-            <button type="submit">Report</button>
-        </form>
-    <?php endif; ?>
-    <?php if (owns_post($post) || can('manage_posts')): ?>
-        <p class="actions">
-            <a href="/posts/edit?id=<?= e($post['id']) ?>">Edit</a>
-        <form method="post" action="/posts/delete" onsubmit="return confirm('Delete this post?')">
-            <?= csrf_field() ?>
-            <input type="hidden" name="id" value="<?= e($post['id']) ?>">
-            <button type="submit">Delete</button>
-        </form>
-        </p>
-    <?php endif; ?>
+<?php endif; ?>
 </article>

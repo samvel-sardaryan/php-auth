@@ -1,3 +1,6 @@
+<?php $title = 'Verify your email'; ?>
+<?php require __DIR__ . '/_header.php'; ?>
+
 <form method="post" action="/resend-verification" novalidate>
     <?= csrf_field() ?>
     <p>Please verify your email to continue.</p>
@@ -13,3 +16,5 @@
     <?= csrf_field() ?>
     <button type="submit">Logout</button>
 </form>
+
+<?php require __DIR__ . '/_footer.php'; ?>

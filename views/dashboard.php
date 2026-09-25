@@ -1,3 +1,6 @@
+<?php $title = 'Dashboard'; ?>
+<?php require __DIR__ . '/_header.php'; ?>
+
 <h1>Dashboard</h1>
 
 <?php if ($success): ?>
@@ -7,10 +10,10 @@
     <p class="error"><?= e($error) ?></p>
 <?php endif; ?>
 <div>
-    <p><span class="label">Hello</span> <?= e($user['name']) ?></p>
-    <p><span class="label">Role:</span> <?= e($user['role_name']) ?></p>
-    <p><span class="label">Email:</span> <?= e($user['email']) ?></p>
-    <p><span class="label">Created At:</span> <?= e($user['created_at']) ?></p>
+    <p><span>Hello</span> <?= e($user['name']) ?></p>
+    <p><span>Role:</span> <?= e($user['role_name']) ?></p>
+    <p><span>Email:</span> <?= e($user['email']) ?></p>
+    <p><span>Created At:</span> <?= e($user['created_at']) ?></p>
     <?php if (can('access_admin_page')): ?>
         <a href="/admin">Admin</a>
     <?php endif; ?>
@@ -28,3 +31,5 @@
         <button type="submit">Logout</button>
     </form>
 </div>
+
+<?php require __DIR__ . '/_footer.php'; ?>

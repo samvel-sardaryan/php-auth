@@ -1,3 +1,6 @@
+<?php $title = 'Users'; ?>
+<?php require __DIR__ . '/_header.php'; ?>
+
 <table border="1">
     <thead>
         <tr>
@@ -44,3 +47,5 @@
 <?php if ($error): ?>
     <p class="error"><?= e($error) ?></p>
 <?php endif; ?>
+
+<?php require __DIR__ . '/_footer.php'; ?>

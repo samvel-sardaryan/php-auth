@@ -1,3 +1,6 @@
+<?php $title = 'Profile'; ?>
+<?php require __DIR__ . '/_header.php'; ?>
+
 <h1>Profile</h1>
 
 <?php if ($success): ?>
@@ -137,3 +140,5 @@
 <?php endif; ?>
 
 <a href="/dashboard">Back to dashboard</a>
+
+<?php require __DIR__ . '/_footer.php'; ?>

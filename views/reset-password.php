@@ -1,3 +1,6 @@
+<?php $title = 'Reset Password'; ?>
+<?php require __DIR__ . '/_header.php'; ?>
+
 <form method="post" action="/reset-password" novalidate>
     <?= csrf_field() ?>
     <input type="hidden" name="token" value="<?= e($token) ?>">
@@ -23,3 +26,5 @@
     <?php endif; ?>
     <button type="submit">Reset Password</button>
 </form>
+
+<?php require __DIR__ . '/_footer.php'; ?>

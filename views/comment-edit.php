@@ -1,3 +1,6 @@
+<?php $title = 'Edit comment'; ?>
+<?php require __DIR__ . '/_header.php'; ?>
+
 <h1>Edit comment</h1>
 
 <?php if ($error): ?>
@@ -18,3 +21,5 @@
 </form>
 
 <a href="/posts/show?id=<?= e($comment['post_id']) ?>#comment-<?= e($comment['id']) ?>">Cancel</a>
+
+<?php require __DIR__ . '/_footer.php'; ?>

@@ -1,3 +1,6 @@
+<?php $title = 'Forgot Password'; ?>
+<?php require __DIR__ . '/_header.php'; ?>
+
 <form method="post" action="/forgot-password" novalidate>
     <?= csrf_field() ?>
     <label for="email">Email</label>
@@ -13,3 +16,5 @@
 <?php if ($error): ?>
     <p class="error"><?= e($error) ?></p>
 <?php endif; ?>
+
+<?php require __DIR__ . '/_footer.php'; ?>

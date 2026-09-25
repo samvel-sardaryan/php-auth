@@ -1,3 +1,6 @@
+<?php $title = 'Register'; ?>
+<?php require __DIR__ . '/_header.php'; ?>
+
 <form method="post" action="/register" novalidate>
     <?= csrf_field() ?>
     <div>
@@ -23,3 +26,5 @@
     </div>
     <button type="submit">Register</button>
 </form>
+
+<?php require __DIR__ . '/_footer.php'; ?>

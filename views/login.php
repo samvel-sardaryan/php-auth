@@ -1,3 +1,6 @@
+<?php $title = 'Login'; ?>
+<?php require __DIR__ . '/_header.php'; ?>
+
 <form method="post" action="/login" novalidate>
     <?= csrf_field() ?>
     <div>
@@ -25,3 +28,5 @@
 <form action="/forgot-password" method="GET">
     <button type="submit">Forgot Password</button>
 </form>
+
+<?php require __DIR__ . '/_footer.php'; ?>

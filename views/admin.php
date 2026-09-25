@@ -1,3 +1,6 @@
+<?php $title = 'Admin'; ?>
+<?php require __DIR__ . '/_header.php'; ?>
+
 <h1>Admin Page</h1>
 
 <ul>
@@ -8,3 +11,5 @@
 </ul>
 
 <a href="/dashboard">Back to dashboard</a>
+
+<?php require __DIR__ . '/_footer.php'; ?>
