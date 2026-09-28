@@ -172,6 +172,10 @@ ALTER TABLE posts
     ADD KEY idx_posts_author_status (user_id, status, deleted_at),
     ADD KEY idx_posts_category (category_id);
 
+-- idx_posts_author_status also starts with user_id, so it serves every query the
+-- Task 4 index did and enforces the foreign key on user_id. The old one is redundant.
+ALTER TABLE posts DROP KEY idx_posts_author;
+
 CREATE TABLE IF NOT EXISTS post_tag (
   post_id                 INT UNSIGNED NOT NULL,
   tag_id                  INT UNSIGNED NOT NULL,
@@ -227,7 +231,6 @@ CREATE TABLE IF NOT EXISTS reports (
   created_at              DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_reports_once (reporter_id, target_type, target_id),
-  KEY idx_reports_target (target_type, target_id),
   KEY idx_reports_queue (created_at),
   CONSTRAINT fk_reports_users FOREIGN KEY (reporter_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

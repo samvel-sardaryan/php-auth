@@ -225,8 +225,12 @@ Every page view sets `$title`, requires `_header.php` as its second line and
   `can('manage_posts')` gives the same answer for every post, while `owns_post($post)`
   depends on the row, so it can only be checked after the lookup.
 - Comments are capped at two levels **on write**: a reply to a reply becomes a sibling,
-  so rendering never recurses. A deleted comment that still has live replies is kept in
-  the query and rendered as `[deleted]`, so the thread does not collapse.
+  so rendering never recurses. Every live comment has a Reply link; answering a reply
+  pre-fills an `@name`, since the answer is stored beside it rather than under it.
+- A deleted comment that still has live replies is kept in the query and rendered as
+  `[deleted]`, so the thread does not collapse. **Its thread stays open**: the surviving
+  replies can still be answered, and the answer lands under `[deleted]` like any other.
+  Only the deleted comment itself can no longer be replied to.
 - Likes insert first and let the `UNIQUE (user_id, post_id)` key decide. Checking first
   is two statements, and two fast clicks both pass the check.
 
@@ -256,7 +260,7 @@ Every page view sets `$title`, requires `_header.php` as its second line and
 
 ## Tests
 
-Nineteen suites, **587 checks**, each targeting its own port so they never share a
+Nineteen suites, **597 checks**, each targeting its own port so they never share a
 session. They cover authentication, RBAC, CSRF, profiles, pictures, posts, comments,
 likes, the feed, reports, moderation, deleted posts, rate limits, the activity log, the
 layout, and the eight acceptance scenarios from the spec.

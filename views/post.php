@@ -29,6 +29,21 @@
         <?php endif; ?>
     <?php endforeach; ?>
 
+    <?php
+    $replyTarget = null;
+    foreach ($comments['top'] ?? [] as $c) {
+        if ((int) $c['id'] === (int) $replyTo && $c['deleted_at'] === null) {
+            $replyTarget = $c;
+        }
+        foreach ($comments['replies'][$c['id']] ?? [] as $r) {
+            if ((int) $r['id'] === (int) $replyTo) {
+                $replyTarget = $r;
+            }
+        }
+    }
+    $mention = $replyTarget && $replyTarget['parent_id'] !== null ? '@' . $replyTarget['author_name'] . ' ' : '';
+    ?>
+
     <?php if ($post['status'] !== 'published'): ?>
         <p class="hint">Comments are closed on <?= e($post['status']) ?> posts.</p>
     <?php elseif (!$viewer): ?>
@@ -39,21 +54,21 @@
         <form method="post" action="/comments/create" id="comment-form" novalidate>
             <?= csrf_field() ?>
             <input type="hidden" name="post_id" value="<?= e($post['id']) ?>">
-            <?php if (!empty($replyTo)): ?>
-                <input type="hidden" name="parent_id" value="<?= e($replyTo) ?>">
+            <?php if ($replyTarget): ?>
+                <input type="hidden" name="parent_id" value="<?= e($replyTarget['id']) ?>">
                 <p class="hint">
-                    Replying to a comment.
+                    Replying to <a href="#comment-<?= e($replyTarget['id']) ?>"><?= e($replyTarget['author_name']) ?></a>.
                     <a href="/posts/show?id=<?= e($post['id']) ?>#comment-form">Cancel</a>
                 </p>
             <?php endif; ?>
             <div>
-                <label for="content"><?= !empty($replyTo) ? 'Your reply' : 'Add a comment' ?></label>
-                <textarea id="content" name="content" rows="4" cols="60"><?= e($old['content'] ?? '') ?></textarea>
+                <label for="content"><?= $replyTarget ? 'Your reply' : 'Add a comment' ?></label>
+                <textarea id="content" name="content" rows="4" cols="60"><?= e($old['content'] ?? $mention) ?></textarea>
                 <?php if (isset($errors['content'])): ?>
                     <span class="error"><?= e($errors['content']) ?></span>
                 <?php endif; ?>
             </div>
-            <button type="submit"><?= !empty($replyTo) ? 'Reply' : 'Comment' ?></button>
+            <button type="submit"><?= $replyTarget ? 'Reply' : 'Comment' ?></button>
         </form>
     <?php endif; ?>
 </section>

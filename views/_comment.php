@@ -3,7 +3,7 @@
 $canAct = $viewer && is_verified($viewer) && $comment['deleted_at'] === null;
 $isMine = $canAct && (int) $comment['user_id'] === (int) $viewer['id'];
 $canDelete = $canAct && ($isMine || (int) $post['user_id'] === (int) $viewer['id'] || can('moderate_comments'));
-$canReply = $canAct && $comment['parent_id'] === null && $post['status'] === 'published';
+$canReply = $canAct && $post['status'] === 'published';
 ?>
 <div class="comment" id="comment-<?= e($comment['id']) ?>">
     <?php if ($comment['deleted_at'] !== null): ?>
