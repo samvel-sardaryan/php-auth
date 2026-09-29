@@ -10,7 +10,6 @@
     <p class="error"><?= e($error) ?></p>
 <?php endif; ?>
 
-<!-- GET, so a filtered log is a shareable URL and needs no CSRF token -->
 <form method="get" action="/admin/activity" class="filters">
     <label for="user_id">User</label>
     <select id="user_id" name="user_id">
@@ -41,6 +40,8 @@
             $link = null;
             if ($row['target_type'] === 'post' && $row['target_id'] !== null) {
                 $link = '/posts/show?id=' . $row['target_id'];
+            } elseif ($row['target_type'] === 'comment' && $row['comment_post_id'] !== null) {
+                $link = '/posts/show?id=' . $row['comment_post_id'] . '#comment-' . $row['target_id'];
             } elseif ($row['target_type'] === 'user' && $row['target_id'] !== null) {
                 $link = '/users?id=' . $row['target_id'];
             }

@@ -3,7 +3,7 @@
     <h3><a href="/posts/show?id=<?= e($post['id']) ?>"><?= e($post['title']) ?></a></h3>
     <p class="meta">
         by <a href="/users?id=<?= e($post['user_id']) ?>"><?= e($post['author_name']) ?></a>
-        in <?= e($post['category_name']) ?>
+        in <a href="/posts?category=<?= urlencode($post['category_slug']) ?>"><?= e($post['category_name']) ?></a>
         on <?= e($post['created_at']) ?>
         <?php if ($post['status'] !== 'published'): ?>
             <span class="status-badge"><?= e(strtoupper($post['status'])) ?></span>

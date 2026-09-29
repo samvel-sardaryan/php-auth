@@ -49,7 +49,7 @@ function attach_post_extras(array $posts, $viewerId = null) {
 
 function feed_url(array $p, int $page) {
     $q = [];
-    if ($p['category'] !== null) {
+    if ($p['category'] !== '') {
         $q['category'] = $p['category'];
     }
     if ($p['author'] !== null) {
@@ -376,7 +376,7 @@ function read_feed_params() {
     $page = max(1, (int)($_GET['page'] ?? 1));
     $sort = (string)($_GET['sort'] ?? '');
     $sort = isset(FEED_SORTS[$sort]) ? $sort : 'newest';
-    $category = (int)($_GET['category'] ?? 0) ?: null;
+    $category = trim($_GET['category'] ?? '');
     $author = (int)($_GET['author'] ?? 0) ?: null;
     $tag = trim($_GET['tag'] ?? '');
     $q = trim($_GET['q'] ?? '');

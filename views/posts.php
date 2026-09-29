@@ -16,13 +16,12 @@
     <p><a href="/posts/create">New post</a></p>
 <?php endif; ?>
 
-<!-- GET, so a filtered feed is a shareable URL and needs no CSRF token -->
 <form method="get" action="/posts" class="filters">
     <input type="search" name="q" value="<?= e($p['q']) ?>" placeholder="Search posts">
     <select name="category">
         <option value="">All categories</option>
         <?php foreach ($categories as $c): ?>
-            <option value="<?= e($c['id']) ?>" <?= (int) $p['category'] === (int) $c['id'] ? 'selected' : '' ?>><?= e($c['name']) ?></option>
+            <option value="<?= e($c['slug']) ?>" <?= $p['category'] === $c['slug'] ? 'selected' : '' ?>><?= e($c['name']) ?></option>
         <?php endforeach; ?>
     </select>
     <input type="text" name="tag" value="<?= e($p['tag']) ?>" placeholder="Tag">

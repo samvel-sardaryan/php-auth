@@ -79,7 +79,8 @@ Open http://localhost:8000
 | POST | `/posts/like` | Like or unlike (one route, it toggles) | verified |
 
 Feed parameters, all optional and all validated: `q`, `category`, `author`, `tag`,
-`sort` (`newest`, `liked`, `commented`), `page`.
+`sort` (`newest`, `liked`, `commented`), `page`. `category` takes the category's
+**slug**, so links read `/posts?category=tutorial`; a post's category name links there.
 
 ### Comments
 
@@ -260,7 +261,7 @@ Every page view sets `$title`, requires `_header.php` as its second line and
 
 ## Tests
 
-Nineteen suites, **597 checks**, each targeting its own port so they never share a
+Nineteen suites, **600 checks**, each targeting its own port so they never share a
 session. They cover authentication, RBAC, CSRF, profiles, pictures, posts, comments,
 likes, the feed, reports, moderation, deleted posts, rate limits, the activity log, the
 layout, and the eight acceptance scenarios from the spec.

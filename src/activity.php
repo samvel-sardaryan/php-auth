@@ -11,7 +11,9 @@ function log_activity($action, $targetType = null, $targetId = null) {
 }
 
 function list_activity($userId = null, $limit = null, $offset = null) {
-    $sql = "SELECT a.*, u.name AS user_name FROM activity_log a LEFT JOIN users u ON a.user_id = u.id ";
+    $sql = "SELECT a.*, u.name AS user_name, c.post_id AS comment_post_id FROM activity_log a 
+            LEFT JOIN users u ON a.user_id = u.id 
+            LEFT JOIN comments c ON a.target_type = 'comment' AND c.id = a.target_id";
     $params = [];
     if ($userId) {
         $sql .= " WHERE a.user_id = ?";

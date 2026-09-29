@@ -10,7 +10,7 @@ const FEED_SORTS = [
     'commented' => 'ORDER BY comment_count DESC, posts.id DESC'
 ];
 
-const POST_SELECT = "SELECT posts.*, users.name AS author_name, categories.name AS category_name,
+const POST_SELECT = "SELECT posts.*, users.name AS author_name, categories.name AS category_name, categories.slug AS category_slug,
     (SELECT COUNT(*) FROM post_likes pl WHERE pl.post_id = posts.id) AS like_count,
     (SELECT COUNT(*) FROM comments c WHERE c.post_id = posts.id AND c.deleted_at IS NULL) AS comment_count
     FROM posts
@@ -113,8 +113,8 @@ function delete_post_images($postId, array $imageIds) {
 function feed_where(array $p) {
     [$sql, $params] = post_visibility($p['viewerId'], $p['seeAll']);
 
-    if ($p['category']) {
-        $sql .= ' AND posts.category_id = ?';
+    if ($p['category'] !== '') {
+        $sql .= ' AND categories.slug = ?';
         $params[] = $p['category'];
     }
 

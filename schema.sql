@@ -172,8 +172,6 @@ ALTER TABLE posts
     ADD KEY idx_posts_author_status (user_id, status, deleted_at),
     ADD KEY idx_posts_category (category_id);
 
--- idx_posts_author_status also starts with user_id, so it serves every query the
--- Task 4 index did and enforces the foreign key on user_id. The old one is redundant.
 ALTER TABLE posts DROP KEY idx_posts_author;
 
 CREATE TABLE IF NOT EXISTS post_tag (
